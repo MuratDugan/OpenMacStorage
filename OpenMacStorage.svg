@@ -1,0 +1,30 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1024" height="1024" viewBox="0 0 1024 1024">
+  <defs>
+    <clipPath id="sq"><rect width="1024" height="1024" rx="229" ry="229"></rect></clipPath>
+    <radialGradient id="bg" cx="30%" cy="20%" r="120%">
+      <stop offset="0%" stop-color="#2a3566"></stop>
+      <stop offset="45%" stop-color="#1a2046"></stop>
+      <stop offset="100%" stop-color="#0c1030"></stop>
+    </radialGradient>
+    <radialGradient id="shine" cx="50%" cy="35%" r="60%">
+      <stop offset="0%" stop-color="#fff" stop-opacity="0.18"></stop>
+      <stop offset="100%" stop-color="#fff" stop-opacity="0"></stop>
+    </radialGradient>
+    <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="14"></feGaussianBlur>
+    </filter>
+    <linearGradient id="topLight" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#fff" stop-opacity="0.10"></stop>
+      <stop offset="35%" stop-color="#fff" stop-opacity="0"></stop>
+    </linearGradient>
+  </defs>
+  <g clip-path="url(#sq)">
+    <rect width="1024" height="1024" fill="url(#bg)"></rect>
+    <rect width="1024" height="1024" fill="url(#topLight)"></rect>
+    <ellipse cx="512" cy="600" rx="320" ry="40" fill="#000" opacity="0.35" filter="url(#shadow)"></ellipse>
+    <path d="M512 168 A320 320 0 0 1 512 808 L512 666 A178 178 0 0 0 512 310 Z" fill="#8a93a6"></path><path d="M512 808 A320 320 0 0 1 221.98150814827204 623.2378437570238 L350.6772139074763 563.2260505898445 A178 178 0 0 0 512 666 Z" fill="#ff9b54"></path><path d="M221.98150814827204 623.2378437570238 A320 320 0 0 1 211.29836134850927 378.55355413578604 L344.73471350010834 427.120414488031 A178 178 0 0 0 350.6772139074763 563.2260505898445 Z" fill="#3ed7c8"></path><path d="M211.29836134850927 378.55355413578604 A320 320 0 0 1 306.30796490030735 242.86577820192707 L397.583805475796 351.6440891248219 A178 178 0 0 0 344.73471350010834 427.120414488031 Z" fill="#3ddc84"></path><path d="M306.30796490030735 242.86577820192707 A320 320 0 0 1 429.1779055671934 178.90373558749815 L465.9302099717513 316.06520292054586 A178 178 0 0 0 397.583805475796 351.6440891248219 Z" fill="#3a8cff"></path><path d="M429.1779055671934 178.90373558749815 A320 320 0 0 1 511.99999999999994 168 L511.99999999999994 310 A178 178 0 0 0 465.9302099717513 316.06520292054586 Z" fill="#ffcd3a"></path>
+    <ellipse cx="512" cy="380" rx="280" ry="120" fill="url(#shine)"></ellipse>
+    <circle cx="512" cy="488" r="42" fill="#0c1030"></circle>
+    <circle cx="512" cy="488" r="42" fill="url(#shine)" opacity="0.6"></circle>
+  </g>
+</svg>

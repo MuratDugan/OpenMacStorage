@@ -1,0 +1,20 @@
+.build/
+.swiftpm/
+DerivedData/
+*.xcodeproj/xcuserdata/
+*.xcworkspace/xcuserdata/
+
+# App bundle output
+OpenMacStorage.app/
+Storage.app/
+SaklamaAlani.app/
+
+# Generated icon scaffolding
+AppIcon.iconset/
+
+# macOS
+.DS_Store
+
+# Editor
+.vscode/
+*.swp

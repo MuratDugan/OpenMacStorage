@@ -1,0 +1,144 @@
+/* 简体中文 — Simplified Chinese */
+
+"Storage" = "存储";
+"Home" = "主目录";
+"Whole Disk" = "整个磁盘";
+"Choose Folder…" = "选择文件夹…";
+"Select a folder to scan" = "选择要扫描的文件夹";
+"Scan" = "扫描";
+"Stop" = "停止";
+
+"Overview" = "概览";
+"Browse" = "浏览";
+"Treemap" = "树状图";
+"Search" = "搜索";
+"Tools" = "工具";
+"Duplicates" = "重复文件";
+"Old Downloads" = "旧下载";
+"Uninstall App" = "卸载应用";
+"What Grew?" = "增长内容";
+"File Types" = "文件类型";
+"Diagnostics" = "诊断";
+"System Data" = "系统数据";
+"Cleanup" = "清理";
+"Disk" = "磁盘";
+"%@ used" = "已使用 %@";
+"%@ free" = "可用 %@";
+
+"Applications" = "应用程序";
+"Xcode & Developer" = "Xcode 与开发者";
+"Virtual Machines" = "虚拟机";
+"Caches" = "缓存";
+"Logs" = "日志";
+"Mail" = "邮件";
+"Photos" = "照片";
+"Music" = "音乐";
+"Videos" = "视频";
+"Documents" = "文稿";
+"Downloads" = "下载";
+"Trash" = "废纸篓";
+"APFS Snapshots" = "APFS 快照";
+"macOS System" = "macOS 系统";
+"iCloud Drive" = "iCloud 云盘";
+"Other" = "其他";
+
+"Total" = "总计";
+"Files" = "文件";
+"Folders" = "文件夹";
+"Free" = "可用";
+"By Category" = "按类别";
+"No data" = "无数据";
+"Top 15 Items" = "最大 15 项";
+"No scan yet" = "尚未扫描";
+"Scan Now" = "立即扫描";
+"Last scan: **%@** — press **Scan** to refresh." = "上次扫描:**%@** — 按 **扫描** 刷新。";
+"Choose a folder and press **Scan** to begin." = "选择文件夹并按 **扫描** 开始。";
+"Scan complete — %@ s" = "扫描完成 — %@ 秒";
+"Cancelled." = "已取消。";
+"Error: %@" = "错误:%@";
+
+"Name" = "名称";
+"Size" = "大小";
+"Share" = "占比";
+"Kind" = "类型";
+"Contents" = "内容";
+"%lld files" = "%lld 个文件";
+"Filter in this folder" = "在此文件夹中过滤";
+"%lld selected — %@" = "已选 %lld — %@";
+"Trash (%lld)" = "废纸篓 (%lld)";
+"Move to Trash" = "移到废纸篓";
+"Cancel" = "取消";
+"Move" = "移动";
+"Error" = "错误";
+"OK" = "确定";
+"Show in Finder" = "在 Finder 中显示";
+"Copy Path" = "复制路径";
+"Preview (Space)" = "预览(空格)";
+
+"Up" = "上一级";
+"Root" = "根目录";
+"Depth: %lld" = "深度:%lld";
+"Drill In" = "进入";
+
+"All" = "全部";
+"%lld results" = "%lld 个结果";
+"No results" = "无结果";
+"Min size" = "最小";
+"Unlimited" = "不限";
+"Include folders" = "包含文件夹";
+"Category" = "类别";
+"Path" = "路径";
+
+"Duplicate Files" = "重复文件";
+"Total wasted: %@" = "浪费总计:%@";
+"Min size:" = "最小:";
+"%lld copies × %@" = "%lld 份 × %@";
+"Wasted: %@" = "浪费:%@";
+"Starting" = "开始中";
+"Candidate size groups" = "候选大小分组";
+"Head-hash (first 64 KB)" = "头哈希(前 64 KB)";
+"Full SHA-1" = "完整 SHA-1";
+"Completed" = "已完成";
+
+"Older than:" = "早于:";
+"%lld days" = "%lld 天";
+"Refresh" = "刷新";
+"Modified" = "修改时间";
+"Action" = "操作";
+
+"Analyzing…" = "正在分析…";
+"App body: %@" = "应用本体:%@";
+"Select All" = "全选";
+"Deselect All" = "全不选";
+"Move App + Selected to Trash" = "将应用及所选移到废纸篓";
+"Confirm Uninstall" = "确认卸载";
+
+"Filter" = "筛选";
+"Grew" = "增长";
+"Added" = "新增";
+"Shrank" = "减少";
+"Removed" = "已删除";
+"Folder" = "文件夹";
+"Before" = "之前";
+"Now" = "现在";
+
+"Calculating…" = "计算中…";
+"Extension" = "扩展名";
+"Total Size" = "总大小";
+"Average" = "平均";
+
+"Where Did System Data Go?" = "系统数据去哪了?";
+"Computed" = "已计算";
+"Components" = "组件";
+"Cleanable" = "可清理";
+"Open in Finder" = "在 Finder 中打开";
+"Empty Contents" = "清空内容";
+
+"Re-measure" = "重新测量";
+"Old Simulators" = "旧模拟器";
+"App Logs" = "应用日志";
+"Empty Trash" = "清空废纸篓";
+"Continue" = "继续";
+"History" = "历史";
+"Freed: %@" = "已释放:%@";
+"Done" = "完成";

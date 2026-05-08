@@ -1,0 +1,552 @@
+/* Türkçe — Turkish */
+
+/* App shell */
+"Storage" = "Saklama Alanı";
+"Home" = "Ana Klasör";
+"Whole Disk" = "Tüm Disk";
+"Choose Folder…" = "Klasör Seç…";
+"Select a folder to scan" = "Taranacak klasörü seç";
+"Scan" = "Tara";
+"Stop" = "Durdur";
+
+/* Sidebar */
+"Overview" = "Genel Bakış";
+"Browse" = "Klasör Gezgini";
+"Treemap" = "Treemap";
+"Search" = "Ara";
+"Tools" = "Araçlar";
+"Duplicates" = "Yinelenenler";
+"Old Downloads" = "Eski İndirilenler";
+"Uninstall App" = "Uygulama Kaldır";
+"What Grew?" = "Ne Büyüdü?";
+"File Types" = "Dosya Türleri";
+"Diagnostics" = "Tanı";
+"System Data" = "Sistem Verileri";
+"Cleanup" = "Temizlik";
+"Disk" = "Disk";
+"%@ used" = "%@ kullanıldı";
+"%@ free" = "%@ boş";
+
+/* Storage categories */
+"Applications" = "Uygulamalar";
+"Xcode & Developer" = "Xcode & Geliştirici";
+"Virtual Machines" = "Sanal Makineler";
+"Caches" = "Önbellekler";
+"Logs" = "Günlükler";
+"Mail" = "E-posta";
+"Photos" = "Fotoğraflar";
+"Music" = "Müzik";
+"Videos" = "Videolar";
+"Documents" = "Belgeler";
+"Downloads" = "İndirilenler";
+"Trash" = "Çöp Sepeti";
+"APFS Snapshots" = "APFS Anlık Görüntüler";
+"macOS System" = "macOS Sistem";
+"iCloud Drive" = "iCloud Drive";
+"Other" = "Diğer";
+
+/* Overview */
+"Last scan: **%@** — press **Scan** to refresh." = "Son tarama: **%@** — yenilemek için **Tara**'ya bas.";
+"Choose a folder and press **Scan** to begin." = "Başlatmak için bir klasör seç ve **Tara**'ya bas.";
+"Scanning — %1$lld files, %2$@" = "Taranıyor — %1$lld dosya, %2$@";
+"Scan complete — %@ s" = "Tarama tamamlandı — %@ sn";
+"Cancelled." = "İptal edildi.";
+"Error: %@" = "Hata: %@";
+"No scan yet" = "Henüz tarama yok";
+"To scan the whole disk, choose a root from the toolbar. On first run, grant Full Disk Access in System Settings — otherwise some folders inside `~/Library` will appear empty." = "Tüm diski taramak için sağ üstten kök yolunu seç. İlk taramada Tam Disk Erişimi vermek istersen sistem ayarlarından izin ver — yoksa `~/Library` dışındaki bazı yerler boş gözükebilir.";
+"Scan Now" = "Şimdi Tara";
+"Total" = "Toplam";
+"Files" = "Dosya";
+"Folders" = "Klasör";
+"Free" = "Boş";
+"By Category" = "Kategorilere Göre";
+"No data" = "Veri yok";
+"Top 15 Items" = "En Büyük 15 Öğe";
+
+/* Browse */
+"No scan" = "Tarama yok";
+"Run a scan first." = "Önce bir klasörü tara.";
+"Name" = "Ad";
+"Size" = "Boyut";
+"Share" = "Pay";
+"Kind" = "Tür";
+"Contents" = "İçerik";
+"%lld files" = "%lld dosya";
+"Filter in this folder" = "Bu klasörde filtrele";
+"%lld selected — %@" = "%lld seçili — %@";
+"Trash (%lld)" = "Çöpe (%lld)";
+"Move to Trash" = "Çöp Sepetine Taşı";
+"Cancel" = "Vazgeç";
+"Move" = "Taşı";
+"%1$lld items (%2$@) will be moved to the Trash. You can restore them by dragging back from the Trash." = "%1$lld öğe (%2$@) Çöp Sepetine taşınacak. Geri almak için Çöp Sepetinden geri sürükleyebilirsin.";
+"Error" = "Hata";
+"OK" = "Tamam";
+"Select an item" = "Bir öğe seç";
+"Preview (Space)" = "Önizle (Space)";
+"Show in Finder" = "Finder'da Göster";
+"Copy Path" = "Yolu Kopyala";
+"Move to Trash (%1$lld) — %2$@" = "Çöp Sepetine Taşı (%1$lld) — %2$@";
+"Some items couldn't be moved:" = "Bazı öğeler taşınamadı:";
+
+/* Treemap */
+"Up" = "Yukarı";
+"Root" = "Köke Dön";
+"Depth: %lld" = "Derinlik: %lld";
+"Scan required for treemap" = "Treemap için tarama gerekli";
+"Drill In" = "İçeri Gir";
+
+/* Search */
+"File or folder name (at least 2 characters)" = "Dosya/klasör adı (en az 2 karakter)";
+"Min size" = "Min. boyut";
+"Unlimited" = "Sınırsız";
+"Include folders" = "Klasörleri dahil et";
+"Category" = "Kategori";
+"All" = "Hepsi";
+"%lld results" = "%lld sonuç";
+"Scan first" = "Önce tara";
+"A scan is required to search." = "Aramak için bir tarama gerekli.";
+"Type to search" = "Aramak için yaz";
+"Set a name, category, or minimum size." = "Ad, kategori veya minimum boyut belirle.";
+"No results" = "Sonuç yok";
+"Loosen the filters." = "Filtreleri gevşet.";
+"Path" = "Yol";
+
+/* Duplicates */
+"Duplicate Files" = "Yinelenen Dosyalar";
+"Total wasted: %@" = "Toplam israf: %@";
+"Min size:" = "Min boyut:";
+"A scan is required to find duplicates." = "Yineleneni bulmak için bir tarama gerekli.";
+"No duplicates" = "Yinelenen yok";
+"Press **Scan** above." = "Yukarıdan **Tara**'ya bas.";
+"%lld copies × %@" = "%lld kopya × %@";
+"Wasted: %@" = "İsraf: %@";
+"Starting" = "Başlıyor";
+"Candidate size groups" = "Aday boyut grupları";
+"Head-hash (first 64 KB)" = "Head-hash (ilk 64 KB)";
+"Full SHA-1" = "Tam SHA-1";
+"Completed" = "Tamamlandı";
+
+/* Old Downloads */
+"Total: %@" = "Toplam: %@";
+"Older than:" = "Eskilik:";
+"%lld days" = "%lld gün";
+"Min:" = "Min:";
+"Refresh" = "Yenile";
+"No old large files" = "Eski büyük dosya yok";
+"Try loosening the filters." = "Filtreleri gevşet.";
+"Modified" = "Değişti";
+"Action" = "İşlem";
+
+/* App Uninstaller */
+"Analyzing…" = "Analiz ediliyor…";
+"Pick an app" = "Bir uygulama seç";
+"Select an app from the left to see what would be removed." = "Soldan kaldırmak istediğin uygulamayı seç.";
+"App body: %@" = "Uygulama gövdesi: %@";
+"Select All" = "Hepsini Seç";
+"Deselect All" = "Hepsini Kaldır";
+"Related Files (%lld)" = "İlgili Yan Dosyalar (%lld)";
+"No related files found for this app." = "Bu uygulamayla ilişkili yan dosya bulunamadı.";
+"Move App + Selected to Trash" = "Uygulamayı + Seçili Yan Dosyaları Çöpe";
+"Confirm Uninstall" = "Kaldırmayı Onayla";
+"%1$@ and %2$lld related files (%3$@) will be moved to the Trash." = "%1$@ ve %2$lld yan dosya (%3$@) Çöp Sepetine taşınacak.";
+"%1$@ and %2$lld related files moved to Trash." = "%1$@ ve %2$lld yan dosya çöpe taşındı.";
+"Some files couldn't be moved: %lld errors." = "Bazı dosyalar taşınamadı: %lld hata.";
+"Application Support" = "Uygulama Verileri";
+"Container" = "Konteyner";
+"Group Container" = "Grup Konteyneri";
+"Preferences" = "Tercihler";
+"Saved State" = "Kayıtlı Durum";
+"HTTP Storage" = "HTTP Saklama";
+"WebKit" = "WebKit";
+"Cookies" = "Çerezler";
+"System Application Support" = "Sistem Uygulama Verileri";
+"System Caches" = "Sistem Önbellekleri";
+"System Logs" = "Sistem Günlükleri";
+"System Preferences" = "Sistem Tercihleri";
+
+/* Scan Diff */
+"Previous scan: **%@** — comparing with current." = "Önceki tarama: **%@** — şimdiki ile karşılaştırılıyor.";
+"Two scans are needed for a comparison. You've made the first; after the second, deltas will appear here." = "Karşılaştırma için iki tarama gerekli. İlkini yaptın; ikinciyi yaptıktan sonra burada delta görünecek.";
+"Filter" = "Filtre";
+"Grew" = "Büyüyenler";
+"Added" = "Yeni";
+"Shrank" = "Küçülenler";
+"Removed" = "Silinenler";
+"No significant changes" = "Önemli değişim yok";
+"No deltas above 100 MB." = "100 MB üzeri delta bulunamadı.";
+"No results in this filter" = "Bu filtrede sonuç yok";
+"Try a different filter." = "Başka bir filtre dene.";
+"Dir" = "Yön";
+"Folder" = "Klasör";
+"Before" = "Önceki";
+"Now" = "Şimdi";
+
+/* File Types */
+"Calculating…" = "Hesaplanıyor…";
+"Extension" = "Uzantı";
+"Total Size" = "Toplam Boyut";
+"Average" = "Ortalama";
+"(no extension)" = "(uzantısız)";
+
+/* System Data */
+"Where Did System Data Go?" = "Sistem Verileri Nereye Gitti?";
+"Components grouped under macOS's \"System Data\" bucket. Most are safe to clean." = "macOS'un \"Sistem Verileri\" başlığı altında topladığı bileşenler. Çoğu güvenli temizlenebilir.";
+"Computed" = "Hesaplanan";
+"Components" = "Bileşen";
+"Cleanable" = "Temizlenebilir";
+"Open in Finder" = "Finder'da Aç";
+"Empty Contents" = "İçeriği Boşalt";
+"Xcode build cache. Safe to delete — Xcode regenerates it on next build." = "Xcode build önbelleği. Silmek güvenli — bir sonraki derlemede yenisi oluşur.";
+"Symbols for old iOS versions. Safe to delete for devices you no longer use." = "Eski iOS sürümlerinin sembolleri. Bağlanmadığınız cihazların verisi silinebilir.";
+"Simulator device images. Unused ones can be cleaned with `xcrun simctl delete unavailable`." = "Simülatör cihaz imajları. Kullanılmayanlar `xcrun simctl delete unavailable` ile temizlenebilir.";
+"App Store distribution archives. Safe to delete once published." = "App Store dağıtım arşivleri. Yayınladığınızdan eminseniz silinebilir.";
+"Per-app caches. Generally safe to delete; apps will rebuild them." = "Uygulama önbellekleri. Silmek genelde güvenli, uygulamalar yeniden oluşturur.";
+"System-wide caches." = "Sistem geneli önbellekler.";
+"Docker Desktop virtual disk image. Tends to grow large." = "Docker Desktop sanal disk imajı. Çok büyür.";
+"OrbStack VM and container disk images." = "OrbStack sanal makine ve container disk dosyaları.";
+"Downloaded email attachments. Going offline in Mail.app shrinks this." = "İndirilen e-posta ekleri. Mail.app'ta hesabı offline bırakırsanız küçülür.";
+"Application log files." = "Uygulama logları.";
+"%lld local snapshots. Delete with `tmutil deletelocalsnapshots`." = "%lld yerel anlık görüntü. Silmek için `tmutil deletelocalsnapshots` kullanılır.";
+"Sleep Image" = "Uyku İmajı";
+"RAM contents during sleep. Not recommended to delete — system regenerates it." = "Uyku sırasında RAM içeriği. Silinmesi önerilmez (sistem yeniden oluşturur).";
+"Docker Desktop VM" = "Docker Desktop VM";
+"OrbStack" = "OrbStack";
+"User Caches" = "Kullanıcı Önbelleği";
+"APFS Local Snapshots" = "APFS Yerel Anlık Görüntüler";
+"iOS Device Support" = "iOS Device Support";
+"iOS Simulators" = "iOS Simülatörleri";
+"Xcode DerivedData" = "Xcode DerivedData";
+"Xcode Archives" = "Xcode Arşivleri";
+
+/* Cleanup */
+"Re-measure" = "Yeniden Ölç";
+"Each card shows the **estimated size** of what it will delete. Every action still asks for confirmation." = "Her kart, silineceğini söylediği şeyin **tahmini boyutunu** ölçüp gösterir. İşlem yine onay ister.";
+"Build caches. Xcode regenerates them on next build." = "Build önbellekleri. Bir sonraki derlemede yenisi oluşur.";
+"Symbols for old iOS versions you've connected." = "Bağlanmış eski iOS sürümlerinin sembolleri.";
+"Old Simulators" = "Eski Simülatörler";
+"Removes unavailable iOS simulator devices." = "Kullanılamayan iOS simülatör cihazlarını siler.";
+"Delete Old Simulators" = "Eski Simülatörleri Sil";
+"Will run `xcrun simctl delete unavailable`." = "`xcrun simctl delete unavailable` çalıştırılacak.";
+"Time Machine local snapshots." = "Time Machine yerel anlık görüntüleri.";
+"Delete Snapshots" = "Anlık Görüntüleri Sil";
+"Will run `tmutil deletelocalsnapshots /`. Safe if you have a Time Machine backup." = "`tmutil deletelocalsnapshots /` çalıştırılacak. Time Machine yedeklemen varsa risk yok.";
+"Per-app caches under ~/Library/Caches." = "~/Library/Caches içindeki uygulama önbellekleri.";
+"App Logs" = "Uygulama Logları";
+"Log files under ~/Library/Logs." = "~/Library/Logs içindeki log dosyaları.";
+"App Store distribution archives." = "App Store dağıtım arşivleri.";
+"Empty Trash" = "Çöp Sepetini Boşalt";
+"Permanently empties the Trash." = "Çöp Sepetini kalıcı olarak boşaltır.";
+"The Trash will be emptied permanently. This cannot be undone." = "Çöp Sepeti kalıcı olarak boşaltılacak. Geri alınamaz.";
+"Continue" = "Devam Et";
+"DerivedData" = "DerivedData";
+"Clean %@" = "%@ Temizle";
+"Contents of **%1$@** will be deleted.\nEstimated to free: **%2$@**" = "**%1$@** içeriği silinecek.\nTahmini boşaltılacak alan: **%2$@**";
+"History" = "Geçmiş";
+"Freed: %@" = "Boşaldı: %@";
+"Done" = "Tamamlandı";
+"Emptied" = "Boşaltıldı";
+"Couldn't access: %@" = "Erişilemedi: %@";
+"%lld items couldn't be deleted (permission)" = "%lld öğe silinemedi (izin)";
+"tmutil deletelocalsnapshots / executed" = "tmutil deletelocalsnapshots / çalıştırıldı";
+
+/* Duplicates */
+"Wasted Space" = "Boşa Giden Alan";
+"Duplicate Groups" = "Yinelenen Grup";
+"Find Duplicates" = "Yinelenenleri Bul";
+"Run a scan from the toolbar so we have files to compare." = "Karşılaştırılacak dosyalar için araç çubuğundan bir tarama başlat.";
+"No duplicates yet" = "Henüz yinelenen yok";
+"Press **Find Duplicates** above. Larger minimum sizes finish faster." = "Yukarıdan **Yinelenenleri Bul**'a bas. Min boyut büyüdükçe tarama hızlanır.";
+"%lld copies" = "%lld kopya";
+"%@ each" = "her biri %@";
+"recoverable" = "kurtarılabilir";
+"Original" = "Orijinal";
+
+/* Old Downloads */
+"Large files in your **Downloads** that haven't been touched in a while. Often the easiest source of GBs." = "**İndirilenler** klasöründe uzun süredir dokunulmamış büyük dosyalar. Çoğu zaman en kolay GB kaynağıdır.";
+"Reclaimable" = "Kazanılabilir";
+"Older Than" = "Eskilik";
+"%lld d" = "%lld g";
+"Quick presets:" = "Hızlı seçim:";
+"30 days" = "30 gün";
+"90 days" = "90 gün";
+"6 months" = "6 ay";
+"1 year" = "1 yıl";
+"Include iCloud Drive" = "iCloud Drive dahil";
+"Older than: **%lld days**" = "Şundan eski: **%lld gün**";
+"Min size: **%lld MB**" = "Min boyut: **%lld MB**";
+"%lld days ago" = "%lld gün önce";
+"Your Downloads folder is tidy. Try lowering the size threshold to see smaller files." = "İndirilenler klasörün temiz. Daha küçük dosyaları görmek için boyut eşiğini düşür.";
+
+/* App Uninstaller */
+"App body: %@" = "Uygulama gövdesi: %@";
+"%lld related" = "%lld ilgili";
+"total recoverable" = "toplam kurtarılabilir";
+"Will be moved to Trash" = "Çöp Sepetine taşınacak";
+"Uninstall %@" = "%@ Kaldır";
+"Select an app on the left to see what would be removed alongside it." = "Soldan bir uygulama seç — onunla birlikte silinecek dosyaları göreyim.";
+"No related files found." = "İlgili yan dosya bulunamadı.";
+
+/* What Grew? */
+"Compared with previous scan from **%@**" = "**%@** tarihindeki önceki tarama ile karşılaştırılıyor";
+"Net Change" = "Net Değişim";
+"Folders Grew" = "Büyüyen Klasör";
+"Newly Added" = "Yeni Eklenen";
+"Cleaned Up" = "Temizlenen";
+"No items in this filter" = "Bu filtrede sonuç yok";
+"Try a different filter pill above." = "Yukarıdan başka bir filtre seç.";
+"Two scans are needed" = "İki tarama gerekli";
+"Run a scan now, then run another later — the difference between them will appear here." = "Şimdi bir tarama yap, sonradan bir tane daha — aradaki fark burada görünecek.";
+
+/* File Types */
+"Total disk usage by file extension. Useful for spotting one-off bloat — say a single 50 GB `.psd` you forgot about." = "Dosya uzantısına göre toplam disk kullanımı. Tek seferlik şişkinlikleri (örneğin unutulmuş 50 GB'lık `.psd`) yakalamak için pratik.";
+"Total Indexed" = "İndekslenen";
+"Distinct Types" = "Farklı Tür";
+"Biggest Type" = "En Büyük Tür";
+"Top 12 by size" = "Boyuta göre ilk 12";
+"All file types" = "Tüm dosya türleri";
+"%lld types" = "%lld tür";
+"%lld files · avg %@" = "%lld dosya · ort. %@";
+"Run a scan from the toolbar so we can break down your files by type." = "Türlere göre dağılım için araç çubuğundan bir tarama başlat.";
+
+/* Extension file list sheet (drill-down from File Types) */
+"Filter by name or path" = "Ad veya yola göre filtrele";
+"Sort" = "Sırala";
+"Largest first" = "Önce büyükler";
+"Smallest first" = "Önce küçükler";
+"Name A → Z" = "Ad A → Z";
+"Name Z → A" = "Ad Z → A";
+"Path" = "Yol";
+"%lld selected · %@" = "%lld seçili · %@";
+"Showing %1$lld–%2$lld of %3$lld" = "Gösterilen %1$lld–%2$lld / %3$lld";
+"Page %1$lld of %2$lld" = "Sayfa %1$lld / %2$lld";
+"%lld files (%@) will be moved to the Trash." = "%lld dosya (%@) Çöp Sepetine taşınacak.";
+"Some files couldn't be moved." = "Bazı dosyalar taşınamadı.";
+"Nothing matches" = "Eşleşen yok";
+"Loosen the search to see files." = "Filtreyi gevşet.";
+
+/* ScanDiff pagination */
+"Load %1$lld more (%2$lld hidden)" = "%1$lld tane daha yükle (%2$lld gizli)";
+
+/* SystemData / Cleanup polish */
+"Computed Total" = "Hesaplanan Toplam";
+"Safe to clean" = "Güvenle silinebilir";
+"Manual cleanup only" = "Sadece elle temizlenir";
+"Empty %@?" = "%@ boşaltılsın mı?";
+"Reclaimable now" = "Şu an kazanılabilir";
+"Snapshots" = "Anlık Görüntü";
+"Developer" = "Geliştirici";
+"System" = "Sistem";
+"Other" = "Diğer";
+
+/* Browse view advanced filtering + safety */
+"%lld items in this folder" = "Bu klasörde %lld öğe";
+"%lld files total" = "toplam %lld dosya";
+"Showing %1$lld of %2$lld" = "Gösterilen %1$lld / %2$lld";
+"Filter by name" = "Ada göre filtrele";
+"All items" = "Tüm öğeler";
+"Folders only" = "Yalnızca klasörler";
+"Files only" = "Yalnızca dosyalar";
+"All categories" = "Tüm kategoriler";
+"Any size" = "Her boyut";
+"≥ 1 GB" = "≥ 1 GB";
+"≥ %lld MB" = "≥ %lld MB";
+"Clear" = "Temizle";
+"Size: largest" = "Boyut: büyükten küçüğe";
+"Size: smallest" = "Boyut: küçükten büyüğe";
+"%lld selected" = "%lld seçili";
+"Safe" = "Güvenli";
+"Cache" = "Önbellek";
+"App data" = "Uygulama verisi";
+"App will break" = "Uygulama bozulur";
+"Protected" = "Korumalı";
+"I understand — Move to Trash" = "Anladım — Çöpe Taşı";
+"Move to Trash anyway" = "Yine de Çöpe Taşı";
+
+/* Risk reasons */
+"System file — deleting could break macOS itself." = "Sistem dosyası — silmek macOS'u bozabilir.";
+"System database — never delete." = "Sistem veritabanı — asla silme.";
+"System config — never delete." = "Sistem yapılandırması — asla silme.";
+"System binary — never delete." = "Sistem ikilisi — asla silme.";
+"Sealed system volume — never delete." = "Mühürlü sistem birimi — asla silme.";
+"Boot data — deleting prevents macOS from starting." = "Önyükleme verisi — silmek macOS'un başlamasını engeller.";
+"Apple system data — never delete." = "Apple sistem verisi — asla silme.";
+"External volume — make sure you're deleting the right thing." = "Harici birim — doğru şeyi sildiğinden emin ol.";
+"App container — the owning app will lose its data." = "Uygulama kapsayıcısı — sahip olan uygulama verisini kaybeder.";
+"Shared app data — multiple apps may be affected." = "Paylaşılan uygulama verisi — birden fazla uygulama etkilenebilir.";
+"App data — settings, accounts, projects may be lost." = "Uygulama verisi — ayarlar, hesaplar, projeler kaybedilebilir.";
+"System extension — apps depending on it will fail." = "Sistem uzantısı — bağımlı uygulamalar çalışmaz.";
+"Application bundle — better to use the Uninstall App tool." = "Uygulama paketi — Uygulama Kaldır aracını kullanmak daha iyi.";
+"App preferences — the app will reset to defaults." = "Uygulama tercihleri — uygulama varsayılanlara döner.";
+"Saved window state — apps will reopen with default layout." = "Kayıtlı pencere durumu — uygulamalar varsayılan düzende açılır.";
+"Cache — apps will rebuild it automatically." = "Önbellek — uygulamalar otomatik yeniden oluşturur.";
+"Xcode build cache — regenerated on next build." = "Xcode derleme önbelleği — bir sonraki derlemede oluşur.";
+"Xcode archive — only needed if redistributing the app." = "Xcode arşivi — uygulama yeniden dağıtılacaksa gerekli.";
+"iOS simulator data — large but easy to regenerate." = "iOS simülatör verisi — büyük ama kolay yenilenir.";
+"Log file — purely informational." = "Log dosyası — sadece bilgilendirme amaçlı.";
+"Web cache / cookies — sites will need re-login." = "Web önbellek / çerezler — sitelere yeniden giriş gerekir.";
+"System library item." = "Sistem kütüphanesi öğesi.";
+"Dev artefact — regenerated by your tooling." = "Geliştirme ürünü — araçlar tarafından yenilenir.";
+
+/* Kind labels (Browse view "Kind" column) */
+"Folder" = "Klasör";
+"Word document" = "Word belgesi";
+"Excel spreadsheet" = "Excel tablosu";
+"PowerPoint presentation" = "PowerPoint sunusu";
+"Pages document" = "Pages belgesi";
+"Numbers spreadsheet" = "Numbers tablosu";
+"Keynote presentation" = "Keynote sunusu";
+"Rich text" = "Zengin metin";
+"OpenDocument text" = "OpenDocument metin";
+"OpenDocument spreadsheet" = "OpenDocument tablo";
+"OpenDocument presentation" = "OpenDocument sunu";
+"PDF document" = "PDF belgesi";
+"Text" = "Metin";
+"Markdown" = "Markdown";
+"Log file" = "Log dosyası";
+"CSV data" = "CSV verisi";
+"TSV data" = "TSV verisi";
+"PNG image" = "PNG resim";
+"JPEG image" = "JPEG resim";
+"HEIC image" = "HEIC resim";
+"GIF image" = "GIF resim";
+"TIFF image" = "TIFF resim";
+"WebP image" = "WebP resim";
+"Bitmap image" = "Bitmap resim";
+"SVG image" = "SVG resim";
+"Camera RAW" = "Kamera RAW";
+"Photoshop" = "Photoshop";
+"Illustrator" = "Illustrator";
+"Sketch" = "Sketch";
+"Figma" = "Figma";
+"Adobe XD" = "Adobe XD";
+"Affinity Photo" = "Affinity Photo";
+"Affinity Designer" = "Affinity Designer";
+"MP4 video" = "MP4 video";
+"QuickTime video" = "QuickTime video";
+"Matroska video" = "Matroska video";
+"AVI video" = "AVI video";
+"WebM video" = "WebM video";
+"iTunes video" = "iTunes video";
+"Flash video" = "Flash video";
+"MP3 audio" = "MP3 ses";
+"WAV audio" = "WAV ses";
+"FLAC audio" = "FLAC ses";
+"M4A audio" = "M4A ses";
+"AAC audio" = "AAC ses";
+"OGG audio" = "OGG ses";
+"AIFF audio" = "AIFF ses";
+"ZIP archive" = "ZIP arşivi";
+"RAR archive" = "RAR arşivi";
+"7-Zip archive" = "7-Zip arşivi";
+"TAR archive" = "TAR arşivi";
+"Compressed archive" = "Sıkıştırılmış arşiv";
+"macOS disk image" = "macOS disk imajı";
+"ISO image" = "ISO imajı";
+"Disk image" = "Disk imajı";
+"Web page" = "Web sayfası";
+"Stylesheet" = "Stil dosyası";
+"CSS preprocessor" = "CSS önişleyici";
+"JSON data" = "JSON verisi";
+"YAML data" = "YAML verisi";
+"TOML data" = "TOML verisi";
+"XML data" = "XML verisi";
+"Property list" = "Property list";
+"Swift source" = "Swift kaynak";
+"Python source" = "Python kaynak";
+"Ruby source" = "Ruby kaynak";
+"JavaScript source" = "JavaScript kaynak";
+"TypeScript source" = "TypeScript kaynak";
+"TypeScript React" = "TypeScript React";
+"JavaScript React" = "JavaScript React";
+"Go source" = "Go kaynak";
+"Rust source" = "Rust kaynak";
+"Java source" = "Java kaynak";
+"Kotlin source" = "Kotlin kaynak";
+"C source" = "C kaynak";
+"C++ source" = "C++ kaynak";
+"C header" = "C header";
+"C++ header" = "C++ header";
+"Shell script" = "Shell scripti";
+"PHP source" = "PHP kaynak";
+"Lua source" = "Lua kaynak";
+"Application" = "Uygulama";
+"iOS app" = "iOS uygulaması";
+"Database" = "Veritabanı";
+"TrueType font" = "TrueType yazıtipi";
+"OpenType font" = "OpenType yazıtipi";
+"Web font" = "Web yazıtipi";
+"EPUB book" = "EPUB kitap";
+"Kindle book" = "Kindle kitap";
+"Switch ROM" = "Switch ROM";
+"File (no extension)" = "Dosya (uzantısız)";
+
+/* Kind groups (Type filter dropdown) */
+"Any file" = "Herhangi bir dosya";
+"Documents" = "Belgeler";
+"Images" = "Resimler";
+"Videos" = "Videolar";
+"Audio" = "Ses";
+"Archives" = "Arşivler";
+"Source code" = "Kaynak kodu";
+"Disk images" = "Disk imajları";
+"Applications" = "Uygulamalar";
+
+/* Deep search (Find) */
+"Name contains" = "Ad içerir";
+"Path contains" = "Yol içerir";
+"Wildcard" = "Joker";
+"Regex" = "Regex";
+"Type to find files…" = "Aramak için yaz…";
+"Search the full path…" = "Tam yolda ara…";
+"*.docx, IMG_*.png, *backup*" = "*.docx, IMG_*.png, *backup*";
+"^build.*\\.log$" = "^build.*\\.log$";
+"**%lld** matches" = "**%lld** sonuç";
+"in %@ ms" = "%@ ms'de";
+"No matches." = "Sonuç yok.";
+"Find anything, anywhere" = "Her şeyi, her yerde bul";
+"Path A → Z" = "Yol A → Z";
+"No matches" = "Sonuç yok";
+"Try a different pattern, switch search mode, or loosen filters." = "Farklı bir desen dene, arama modunu değiştir veya filtreleri gevşet.";
+"Invalid wildcard pattern." = "Geçersiz joker deseni.";
+"Invalid regex: " = "Geçersiz regex: ";
+"Waiting…" = "Bekleniyor…";
+"Searching…" = "Aranıyor…";
+"Waiting for you to finish typing…" = "Yazmayı bitirmen bekleniyor…";
+"Scanning the tree…" = "Ağaç taranıyor…";
+"auto: wildcard" = "otomatik: joker";
+"auto: extension" = "otomatik: uzantı";
+
+/* App menu / About / Help / Settings */
+"About OpenMacStorage" = "OpenMacStorage Hakkında";
+"OpenMacStorage on GitHub" = "GitHub'da OpenMacStorage";
+"Report an Issue" = "Sorun Bildir";
+"Send Feedback…" = "Geri Bildirim Gönder…";
+"General" = "Genel";
+"Language" = "Dil";
+"System Default" = "Sistem Varsayılanı";
+"The app will restart to apply the new language." = "Yeni dilin uygulanması için uygulama yeniden başlatılacak.";
+"Restart Required" = "Yeniden Başlatma Gerekli";
+"Later" = "Sonra";
+"Restart Now" = "Şimdi Yeniden Başlat";
+"OpenMacStorage needs to restart for the language change to take effect." = "Dil değişikliğinin geçerli olması için OpenMacStorage'ın yeniden başlatılması gerekiyor.";
+"A free, open-source disk space analyzer for macOS.\n\nMade by Murat Duğan with AI assistance.\nLicensed under MIT.\n\n" = "macOS için ücretsiz, açık kaynaklı disk alanı analizörü.\n\nMurat Duğan tarafından yapay zeka desteği ile yapıldı.\nMIT lisansı altında dağıtılır.\n\n";
+
+/* Disclaimer */
+"Disclaimer & Liability…" = "Sorumluluk Reddi…";
+"Before You Continue" = "Devam Etmeden Önce";
+"OpenMacStorage helps you find and delete files. While we've designed it to be careful — destructive actions ask for confirmation, **Move to Trash** is recoverable, and system-critical paths are skipped by default — **you are ultimately responsible for what gets deleted.**" = "OpenMacStorage dosya bulup silmenize yardım eder. Geri dönülmez işlemler onay ister, **Çöp Sepetine Taşı** geri alınabilirdir ve sistem-kritik yollar varsayılan olarak atlanır — yine de **silinen şeyden son tahlilde siz sorumlusunuz.**";
+"By using OpenMacStorage you agree:" = "OpenMacStorage'ı kullanarak şunları kabul edersiniz:";
+"This software is provided **\"as is\"**, without warranty of any kind (MIT License)." = "Bu yazılım **\"olduğu gibi\"** sunulur, hiçbir garanti içermez (MIT Lisansı).";
+"The author is **not liable** for any data loss, broken applications, or system issues caused by using this app." = "Yazar; bu uygulamanın kullanımından kaynaklanan veri kaybından, bozulan uygulamalardan veya sistem sorunlarından **sorumlu değildir**.";
+"You will keep recent backups (Time Machine or similar) before running cleanup operations." = "Temizlik işlemlerinden önce güncel yedekleriniz (Time Machine vb.) bulunmalıdır.";
+"You will review what is about to be deleted before confirming." = "Silmeyi onaylamadan önce silinecek şeyleri gözden geçireceksiniz.";
+"This app was built with AI assistance by a non-professional developer. The source code is open and auditable on GitHub — please review it if your situation requires it." = "Bu uygulama, profesyonel olmayan bir geliştirici tarafından yapay zeka desteği ile yapılmıştır. Kaynak kodu GitHub'da açık ve denetlenebilir — durumunuz gerektiriyorsa lütfen inceleyin.";
+"Operations that **cannot be undone**:" = "**Geri alınamayacak** işlemler:";
+"Empty Contents on directories" = "Klasör içeriğini boşaltma";
+"Deleting APFS local snapshots" = "APFS yerel anlık görüntülerini silme";
+"Deleting Xcode DerivedData, archives, or simulators" = "Xcode DerivedData, arşiv veya simülatörlerini silme";
+"Permanently removing application support / cache files via Uninstall App" = "Uygulama Kaldır ile destek/önbellek dosyalarını kalıcı silme";
+"I understand and accept these terms." = "Bu şartları anladım ve kabul ediyorum.";
+"Quit" = "Çık";
+"Continue" = "Devam Et";
+"Close" = "Kapat";

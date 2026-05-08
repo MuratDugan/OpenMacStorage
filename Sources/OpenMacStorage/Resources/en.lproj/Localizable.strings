@@ -1,0 +1,534 @@
+/* English — base locale. Most keys equal their value, but kept here so the bundle is consistent. */
+
+/* App shell */
+"Storage" = "Storage";
+"Home" = "Home";
+"Whole Disk" = "Whole Disk";
+"Choose Folder…" = "Choose Folder…";
+"Select a folder to scan" = "Select a folder to scan";
+"Scan" = "Scan";
+"Stop" = "Stop";
+
+/* Sidebar */
+"Overview" = "Overview";
+"Browse" = "Browse";
+"Treemap" = "Treemap";
+"Search" = "Search";
+"Tools" = "Tools";
+"Duplicates" = "Duplicates";
+"Old Downloads" = "Old Downloads";
+"Uninstall App" = "Uninstall App";
+"What Grew?" = "What Grew?";
+"File Types" = "File Types";
+"Diagnostics" = "Diagnostics";
+"System Data" = "System Data";
+"Cleanup" = "Cleanup";
+"Disk" = "Disk";
+"%@ used" = "%@ used";
+"%@ free" = "%@ free";
+
+/* Storage categories */
+"Applications" = "Applications";
+"Xcode & Developer" = "Xcode & Developer";
+"Virtual Machines" = "Virtual Machines";
+"Caches" = "Caches";
+"Logs" = "Logs";
+"Mail" = "Mail";
+"Photos" = "Photos";
+"Music" = "Music";
+"Videos" = "Videos";
+"Documents" = "Documents";
+"Downloads" = "Downloads";
+"Trash" = "Trash";
+"APFS Snapshots" = "APFS Snapshots";
+"macOS System" = "macOS System";
+"iCloud Drive" = "iCloud Drive";
+"Other" = "Other";
+
+/* Overview */
+"Last scan: **%@** — press **Scan** to refresh." = "Last scan: **%@** — press **Scan** to refresh.";
+"Choose a folder and press **Scan** to begin." = "Choose a folder and press **Scan** to begin.";
+"Scanning — %1$lld files, %2$@" = "Scanning — %1$lld files, %2$@";
+"Scan complete — %@ s" = "Scan complete — %@ s";
+"Cancelled." = "Cancelled.";
+"Error: %@" = "Error: %@";
+"No scan yet" = "No scan yet";
+"To scan the whole disk, choose a root from the toolbar. On first run, grant Full Disk Access in System Settings — otherwise some folders inside `~/Library` will appear empty." = "To scan the whole disk, choose a root from the toolbar. On first run, grant Full Disk Access in System Settings — otherwise some folders inside `~/Library` will appear empty.";
+"Scan Now" = "Scan Now";
+"Total" = "Total";
+"Files" = "Files";
+"Folders" = "Folders";
+"Free" = "Free";
+"By Category" = "By Category";
+"No data" = "No data";
+"Top 15 Items" = "Top 15 Items";
+
+/* Browse */
+"No scan" = "No scan";
+"Run a scan first." = "Run a scan first.";
+"Name" = "Name";
+"Size" = "Size";
+"Share" = "Share";
+"Kind" = "Kind";
+"Contents" = "Contents";
+"%lld files" = "%lld files";
+"Filter in this folder" = "Filter in this folder";
+"%lld selected — %@" = "%lld selected — %@";
+"Trash (%lld)" = "Trash (%lld)";
+"Move to Trash" = "Move to Trash";
+"Cancel" = "Cancel";
+"Move" = "Move";
+"%1$lld items (%2$@) will be moved to the Trash. You can restore them by dragging back from the Trash." = "%1$lld items (%2$@) will be moved to the Trash. You can restore them by dragging back from the Trash.";
+"Error" = "Error";
+"OK" = "OK";
+"Select an item" = "Select an item";
+"Preview (Space)" = "Preview (Space)";
+"Show in Finder" = "Show in Finder";
+"Copy Path" = "Copy Path";
+"Move to Trash (%1$lld) — %2$@" = "Move to Trash (%1$lld) — %2$@";
+"Some items couldn't be moved:" = "Some items couldn't be moved:";
+
+/* Treemap */
+"Up" = "Up";
+"Root" = "Root";
+"Depth: %lld" = "Depth: %lld";
+"Scan required for treemap" = "Scan required for treemap";
+"Drill In" = "Drill In";
+
+/* Search */
+"File or folder name (at least 2 characters)" = "File or folder name (at least 2 characters)";
+"Min size" = "Min size";
+"Unlimited" = "Unlimited";
+"Include folders" = "Include folders";
+"Category" = "Category";
+"All" = "All";
+"%lld results" = "%lld results";
+"Scan first" = "Scan first";
+"A scan is required to search." = "A scan is required to search.";
+"Type to search" = "Type to search";
+"Set a name, category, or minimum size." = "Set a name, category, or minimum size.";
+"No results" = "No results";
+"Loosen the filters." = "Loosen the filters.";
+"Path" = "Path";
+
+/* Duplicates */
+"Duplicate Files" = "Duplicate Files";
+"Total wasted: %@" = "Total wasted: %@";
+"Min size:" = "Min size:";
+"A scan is required to find duplicates." = "A scan is required to find duplicates.";
+"No duplicates" = "No duplicates";
+"Press **Scan** above." = "Press **Scan** above.";
+"%lld copies × %@" = "%lld copies × %@";
+"Wasted: %@" = "Wasted: %@";
+"Starting" = "Starting";
+"Candidate size groups" = "Candidate size groups";
+"Head-hash (first 64 KB)" = "Head-hash (first 64 KB)";
+"Full SHA-1" = "Full SHA-1";
+"Completed" = "Completed";
+
+/* Old Downloads */
+"Total: %@" = "Total: %@";
+"Older than:" = "Older than:";
+"%lld days" = "%lld days";
+"Min:" = "Min:";
+"Refresh" = "Refresh";
+"No old large files" = "No old large files";
+"Try loosening the filters." = "Try loosening the filters.";
+"Modified" = "Modified";
+"Action" = "Action";
+
+/* App Uninstaller */
+"Applications" = "Applications";
+"Analyzing…" = "Analyzing…";
+"Pick an app" = "Pick an app";
+"Select an app from the left to see what would be removed." = "Select an app from the left to see what would be removed.";
+"App body: %@" = "App body: %@";
+"Select All" = "Select All";
+"Deselect All" = "Deselect All";
+"Related Files (%lld)" = "Related Files (%lld)";
+"No related files found for this app." = "No related files found for this app.";
+"Move App + Selected to Trash" = "Move App + Selected to Trash";
+"Confirm Uninstall" = "Confirm Uninstall";
+"%1$@ and %2$lld related files (%3$@) will be moved to the Trash." = "%1$@ and %2$lld related files (%3$@) will be moved to the Trash.";
+"%1$@ and %2$lld related files moved to Trash." = "%1$@ and %2$lld related files moved to Trash.";
+"Some files couldn't be moved: %lld errors." = "Some files couldn't be moved: %lld errors.";
+"Application Support" = "Application Support";
+"Container" = "Container";
+"Group Container" = "Group Container";
+"Preferences" = "Preferences";
+"Saved State" = "Saved State";
+"HTTP Storage" = "HTTP Storage";
+"WebKit" = "WebKit";
+"Cookies" = "Cookies";
+"System Application Support" = "System Application Support";
+"System Caches" = "System Caches";
+"System Logs" = "System Logs";
+"System Preferences" = "System Preferences";
+
+/* Scan Diff */
+"Previous scan: **%@** — comparing with current." = "Previous scan: **%@** — comparing with current.";
+"Two scans are needed for a comparison. You've made the first; after the second, deltas will appear here." = "Two scans are needed for a comparison. You've made the first; after the second, deltas will appear here.";
+"Filter" = "Filter";
+"Grew" = "Grew";
+"Added" = "Added";
+"Shrank" = "Shrank";
+"Removed" = "Removed";
+"%1$@ (%2$lld)" = "%1$@ (%2$lld)";
+"No significant changes" = "No significant changes";
+"No deltas above 100 MB." = "No deltas above 100 MB.";
+"No results in this filter" = "No results in this filter";
+"Try a different filter." = "Try a different filter.";
+"Dir" = "Dir";
+"Folder" = "Folder";
+"Before" = "Before";
+"Now" = "Now";
+
+/* File Types */
+"Calculating…" = "Calculating…";
+"Extension" = "Extension";
+"Total Size" = "Total Size";
+"Average" = "Average";
+"(no extension)" = "(no extension)";
+
+/* System Data */
+"Where Did System Data Go?" = "Where Did System Data Go?";
+"Components grouped under macOS's \"System Data\" bucket. Most are safe to clean." = "Components grouped under macOS's \"System Data\" bucket. Most are safe to clean.";
+"Computed" = "Computed";
+"Components" = "Components";
+"Cleanable" = "Cleanable";
+"Open in Finder" = "Open in Finder";
+"Empty Contents" = "Empty Contents";
+"Xcode build cache. Safe to delete — Xcode regenerates it on next build." = "Xcode build cache. Safe to delete — Xcode regenerates it on next build.";
+"Symbols for old iOS versions. Safe to delete for devices you no longer use." = "Symbols for old iOS versions. Safe to delete for devices you no longer use.";
+"Simulator device images. Unused ones can be cleaned with `xcrun simctl delete unavailable`." = "Simulator device images. Unused ones can be cleaned with `xcrun simctl delete unavailable`.";
+"App Store distribution archives. Safe to delete once published." = "App Store distribution archives. Safe to delete once published.";
+"Per-app caches. Generally safe to delete; apps will rebuild them." = "Per-app caches. Generally safe to delete; apps will rebuild them.";
+"System-wide caches." = "System-wide caches.";
+"Docker Desktop virtual disk image. Tends to grow large." = "Docker Desktop virtual disk image. Tends to grow large.";
+"OrbStack VM and container disk images." = "OrbStack VM and container disk images.";
+"Downloaded email attachments. Going offline in Mail.app shrinks this." = "Downloaded email attachments. Going offline in Mail.app shrinks this.";
+"Application log files." = "Application log files.";
+"%lld local snapshots. Delete with `tmutil deletelocalsnapshots`." = "%lld local snapshots. Delete with `tmutil deletelocalsnapshots`.";
+"Sleep Image" = "Sleep Image";
+"RAM contents during sleep. Not recommended to delete — system regenerates it." = "RAM contents during sleep. Not recommended to delete — system regenerates it.";
+"Docker Desktop VM" = "Docker Desktop VM";
+"OrbStack" = "OrbStack";
+"User Caches" = "User Caches";
+"APFS Local Snapshots" = "APFS Local Snapshots";
+"iOS Device Support" = "iOS Device Support";
+"iOS Simulators" = "iOS Simulators";
+"Xcode DerivedData" = "Xcode DerivedData";
+"Xcode Archives" = "Xcode Archives";
+
+/* Cleanup */
+"Re-measure" = "Re-measure";
+"Each card shows the **estimated size** of what it will delete. Every action still asks for confirmation." = "Each card shows the **estimated size** of what it will delete. Every action still asks for confirmation.";
+"Build caches. Xcode regenerates them on next build." = "Build caches. Xcode regenerates them on next build.";
+"Symbols for old iOS versions you've connected." = "Symbols for old iOS versions you've connected.";
+"Old Simulators" = "Old Simulators";
+"Removes unavailable iOS simulator devices." = "Removes unavailable iOS simulator devices.";
+"Delete Old Simulators" = "Delete Old Simulators";
+"Will run `xcrun simctl delete unavailable`." = "Will run `xcrun simctl delete unavailable`.";
+"Time Machine local snapshots." = "Time Machine local snapshots.";
+"Delete Snapshots" = "Delete Snapshots";
+"Will run `tmutil deletelocalsnapshots /`. Safe if you have a Time Machine backup." = "Will run `tmutil deletelocalsnapshots /`. Safe if you have a Time Machine backup.";
+"Per-app caches under ~/Library/Caches." = "Per-app caches under ~/Library/Caches.";
+"App Logs" = "App Logs";
+"Log files under ~/Library/Logs." = "Log files under ~/Library/Logs.";
+"App Store distribution archives." = "App Store distribution archives.";
+"Empty Trash" = "Empty Trash";
+"Permanently empties the Trash." = "Permanently empties the Trash.";
+"The Trash will be emptied permanently. This cannot be undone." = "The Trash will be emptied permanently. This cannot be undone.";
+"Continue" = "Continue";
+"DerivedData" = "DerivedData";
+"Clean %@" = "Clean %@";
+"Contents of **%1$@** will be deleted.\nEstimated to free: **%2$@**" = "Contents of **%1$@** will be deleted.\nEstimated to free: **%2$@**";
+"History" = "History";
+"Freed: %@" = "Freed: %@";
+"Done" = "Done";
+"Emptied" = "Emptied";
+"Couldn't access: %@" = "Couldn't access: %@";
+"%lld items couldn't be deleted (permission)" = "%lld items couldn't be deleted (permission)";
+"tmutil deletelocalsnapshots / executed" = "tmutil deletelocalsnapshots / executed";
+
+/* New tool view strings (cards, pills, badges) */
+
+/* Duplicates */
+"Wasted Space" = "Wasted Space";
+"Duplicate Groups" = "Duplicate Groups";
+"Find Duplicates" = "Find Duplicates";
+"Run a scan from the toolbar so we have files to compare." = "Run a scan from the toolbar so we have files to compare.";
+"No duplicates yet" = "No duplicates yet";
+"Press **Find Duplicates** above. Larger minimum sizes finish faster." = "Press **Find Duplicates** above. Larger minimum sizes finish faster.";
+"%lld copies" = "%lld copies";
+"%@ each" = "%@ each";
+"recoverable" = "recoverable";
+"Original" = "Original";
+
+/* Old Downloads */
+"Large files in your **Downloads** that haven't been touched in a while. Often the easiest source of GBs." = "Large files in your **Downloads** that haven't been touched in a while. Often the easiest source of GBs.";
+"Reclaimable" = "Reclaimable";
+"Older Than" = "Older Than";
+"%lld d" = "%lld d";
+"Quick presets:" = "Quick presets:";
+"30 days" = "30 days";
+"90 days" = "90 days";
+"6 months" = "6 months";
+"1 year" = "1 year";
+"Include iCloud Drive" = "Include iCloud Drive";
+"Older than: **%lld days**" = "Older than: **%lld days**";
+"Min size: **%lld MB**" = "Min size: **%lld MB**";
+"%lld days ago" = "%lld days ago";
+"Your Downloads folder is tidy. Try lowering the size threshold to see smaller files." = "Your Downloads folder is tidy. Try lowering the size threshold to see smaller files.";
+
+/* App Uninstaller — extras */
+"App body: %@" = "App body: %@";
+"%lld related" = "%lld related";
+"total recoverable" = "total recoverable";
+"Will be moved to Trash" = "Will be moved to Trash";
+"Uninstall %@" = "Uninstall %@";
+"Select an app on the left to see what would be removed alongside it." = "Select an app on the left to see what would be removed alongside it.";
+"No related files found." = "No related files found.";
+
+/* What Grew? — extras */
+"Compared with previous scan from **%@**" = "Compared with previous scan from **%@**";
+"Net Change" = "Net Change";
+"Folders Grew" = "Folders Grew";
+"Newly Added" = "Newly Added";
+"Cleaned Up" = "Cleaned Up";
+"No items in this filter" = "No items in this filter";
+"Try a different filter pill above." = "Try a different filter pill above.";
+"Two scans are needed" = "Two scans are needed";
+"Run a scan now, then run another later — the difference between them will appear here." = "Run a scan now, then run another later — the difference between them will appear here.";
+
+/* File Types — extras */
+"Total disk usage by file extension. Useful for spotting one-off bloat — say a single 50 GB `.psd` you forgot about." = "Total disk usage by file extension. Useful for spotting one-off bloat — say a single 50 GB `.psd` you forgot about.";
+"Total Indexed" = "Total Indexed";
+"Distinct Types" = "Distinct Types";
+"Biggest Type" = "Biggest Type";
+"Top 12 by size" = "Top 12 by size";
+"All file types" = "All file types";
+"%lld types" = "%lld types";
+"%lld files · avg %@" = "%lld files · avg %@";
+"Run a scan from the toolbar so we can break down your files by type." = "Run a scan from the toolbar so we can break down your files by type.";
+
+/* Extension file list sheet (drill-down from File Types) */
+"Filter by name or path" = "Filter by name or path";
+"Sort" = "Sort";
+"Largest first" = "Largest first";
+"Smallest first" = "Smallest first";
+"Name A → Z" = "Name A → Z";
+"Name Z → A" = "Name Z → A";
+"Path" = "Path";
+"%lld selected · %@" = "%lld selected · %@";
+"Showing %1$lld–%2$lld of %3$lld" = "Showing %1$lld–%2$lld of %3$lld";
+"Page %1$lld of %2$lld" = "Page %1$lld of %2$lld";
+"%lld files (%@) will be moved to the Trash." = "%lld files (%@) will be moved to the Trash.";
+"Some files couldn't be moved." = "Some files couldn't be moved.";
+"Nothing matches" = "Nothing matches";
+"Loosen the search to see files." = "Loosen the search to see files.";
+
+/* ScanDiff pagination */
+"Load %1$lld more (%2$lld hidden)" = "Load %1$lld more (%2$lld hidden)";
+
+/* SystemData / Cleanup polish */
+"Computed Total" = "Computed Total";
+"Safe to clean" = "Safe to clean";
+"Manual cleanup only" = "Manual cleanup only";
+"Empty %@?" = "Empty %@?";
+"Reclaimable now" = "Reclaimable now";
+"Snapshots" = "Snapshots";
+"Developer" = "Developer";
+"System" = "System";
+"Other" = "Other";
+"Empty Contents" = "Empty Contents";
+
+/* Browse view advanced filtering + safety */
+"%lld items in this folder" = "%lld items in this folder";
+"%lld files total" = "%lld files total";
+"Showing %1$lld of %2$lld" = "Showing %1$lld of %2$lld";
+"Filter by name" = "Filter by name";
+"All items" = "All items";
+"Folders only" = "Folders only";
+"Files only" = "Files only";
+"All categories" = "All categories";
+"Any size" = "Any size";
+"≥ 1 GB" = "≥ 1 GB";
+"≥ %lld MB" = "≥ %lld MB";
+"Clear" = "Clear";
+"Size: largest" = "Size: largest";
+"Size: smallest" = "Size: smallest";
+"Category" = "Category";
+"%lld selected" = "%lld selected";
+"Safe" = "Safe";
+"Cache" = "Cache";
+"App data" = "App data";
+"App will break" = "App will break";
+"Protected" = "Protected";
+"I understand — Move to Trash" = "I understand — Move to Trash";
+"Move to Trash anyway" = "Move to Trash anyway";
+"**Refused.** Some items are protected and cannot be deleted from here:\n\n%@\n\nThese are macOS system files. Touching them can break your installation." = "**Refused.** Some items are protected and cannot be deleted from here:\n\n%@\n\nThese are macOS system files. Touching them can break your installation.";
+
+/* Kind labels (Browse view "Kind" column) */
+"Folder" = "Folder";
+"Word document" = "Word document";
+"Excel spreadsheet" = "Excel spreadsheet";
+"PowerPoint presentation" = "PowerPoint presentation";
+"Pages document" = "Pages document";
+"Numbers spreadsheet" = "Numbers spreadsheet";
+"Keynote presentation" = "Keynote presentation";
+"Rich text" = "Rich text";
+"OpenDocument text" = "OpenDocument text";
+"OpenDocument spreadsheet" = "OpenDocument spreadsheet";
+"OpenDocument presentation" = "OpenDocument presentation";
+"PDF document" = "PDF document";
+"Text" = "Text";
+"Markdown" = "Markdown";
+"Log file" = "Log file";
+"CSV data" = "CSV data";
+"TSV data" = "TSV data";
+"PNG image" = "PNG image";
+"JPEG image" = "JPEG image";
+"HEIC image" = "HEIC image";
+"GIF image" = "GIF image";
+"TIFF image" = "TIFF image";
+"WebP image" = "WebP image";
+"Bitmap image" = "Bitmap image";
+"SVG image" = "SVG image";
+"Camera RAW" = "Camera RAW";
+"Photoshop" = "Photoshop";
+"Illustrator" = "Illustrator";
+"Sketch" = "Sketch";
+"Figma" = "Figma";
+"Adobe XD" = "Adobe XD";
+"Affinity Photo" = "Affinity Photo";
+"Affinity Designer" = "Affinity Designer";
+"MP4 video" = "MP4 video";
+"QuickTime video" = "QuickTime video";
+"Matroska video" = "Matroska video";
+"AVI video" = "AVI video";
+"WebM video" = "WebM video";
+"iTunes video" = "iTunes video";
+"Flash video" = "Flash video";
+"MP3 audio" = "MP3 audio";
+"WAV audio" = "WAV audio";
+"FLAC audio" = "FLAC audio";
+"M4A audio" = "M4A audio";
+"AAC audio" = "AAC audio";
+"OGG audio" = "OGG audio";
+"AIFF audio" = "AIFF audio";
+"ZIP archive" = "ZIP archive";
+"RAR archive" = "RAR archive";
+"7-Zip archive" = "7-Zip archive";
+"TAR archive" = "TAR archive";
+"Compressed archive" = "Compressed archive";
+"macOS disk image" = "macOS disk image";
+"ISO image" = "ISO image";
+"Disk image" = "Disk image";
+"Web page" = "Web page";
+"Stylesheet" = "Stylesheet";
+"CSS preprocessor" = "CSS preprocessor";
+"JSON data" = "JSON data";
+"YAML data" = "YAML data";
+"TOML data" = "TOML data";
+"XML data" = "XML data";
+"Property list" = "Property list";
+"Swift source" = "Swift source";
+"Python source" = "Python source";
+"Ruby source" = "Ruby source";
+"JavaScript source" = "JavaScript source";
+"TypeScript source" = "TypeScript source";
+"TypeScript React" = "TypeScript React";
+"JavaScript React" = "JavaScript React";
+"Go source" = "Go source";
+"Rust source" = "Rust source";
+"Java source" = "Java source";
+"Kotlin source" = "Kotlin source";
+"C source" = "C source";
+"C++ source" = "C++ source";
+"C header" = "C header";
+"C++ header" = "C++ header";
+"Shell script" = "Shell script";
+"PHP source" = "PHP source";
+"Lua source" = "Lua source";
+"Application" = "Application";
+"iOS app" = "iOS app";
+"Database" = "Database";
+"TrueType font" = "TrueType font";
+"OpenType font" = "OpenType font";
+"Web font" = "Web font";
+"EPUB book" = "EPUB book";
+"Kindle book" = "Kindle book";
+"Switch ROM" = "Switch ROM";
+"File (no extension)" = "File (no extension)";
+
+/* Kind groups (Type filter dropdown) */
+"Any file" = "Any file";
+"Documents" = "Documents";
+"Images" = "Images";
+"Videos" = "Videos";
+"Audio" = "Audio";
+"Archives" = "Archives";
+"Source code" = "Source code";
+"Disk images" = "Disk images";
+"Applications" = "Applications";
+
+/* Deep search (Find) */
+"Name contains" = "Name contains";
+"Path contains" = "Path contains";
+"Wildcard" = "Wildcard";
+"Regex" = "Regex";
+"Type to find files…" = "Type to find files…";
+"Search the full path…" = "Search the full path…";
+"*.docx, IMG_*.png, *backup*" = "*.docx, IMG_*.png, *backup*";
+"^build.*\\.log$" = "^build.*\\.log$";
+"**%lld** matches" = "**%lld** matches";
+"in %@ ms" = "in %@ ms";
+"No matches." = "No matches.";
+"Find anything, anywhere" = "Find anything, anywhere";
+"Path A → Z" = "Path A → Z";
+"No matches" = "No matches";
+"Try a different pattern, switch search mode, or loosen filters." = "Try a different pattern, switch search mode, or loosen filters.";
+"Invalid wildcard pattern." = "Invalid wildcard pattern.";
+"Invalid regex: " = "Invalid regex: ";
+"Waiting…" = "Waiting…";
+"Searching…" = "Searching…";
+"Waiting for you to finish typing…" = "Waiting for you to finish typing…";
+"Scanning the tree…" = "Scanning the tree…";
+"auto: wildcard" = "auto: wildcard";
+"auto: extension" = "auto: extension";
+
+/* App menu / About / Help / Settings */
+"About OpenMacStorage" = "About OpenMacStorage";
+"OpenMacStorage on GitHub" = "OpenMacStorage on GitHub";
+"Report an Issue" = "Report an Issue";
+"Send Feedback…" = "Send Feedback…";
+"General" = "General";
+"Language" = "Language";
+"System Default" = "System Default";
+"The app will restart to apply the new language." = "The app will restart to apply the new language.";
+"Restart Required" = "Restart Required";
+"Later" = "Later";
+"Restart Now" = "Restart Now";
+"OpenMacStorage needs to restart for the language change to take effect." = "OpenMacStorage needs to restart for the language change to take effect.";
+"A free, open-source disk space analyzer for macOS.\n\nMade by Murat Duğan with AI assistance.\nLicensed under MIT.\n\n" = "A free, open-source disk space analyzer for macOS.\n\nMade by Murat Duğan with AI assistance.\nLicensed under MIT.\n\n";
+
+/* Disclaimer */
+"Disclaimer & Liability…" = "Disclaimer & Liability…";
+"Before You Continue" = "Before You Continue";
+"OpenMacStorage helps you find and delete files. While we've designed it to be careful — destructive actions ask for confirmation, **Move to Trash** is recoverable, and system-critical paths are skipped by default — **you are ultimately responsible for what gets deleted.**" = "OpenMacStorage helps you find and delete files. While we've designed it to be careful — destructive actions ask for confirmation, **Move to Trash** is recoverable, and system-critical paths are skipped by default — **you are ultimately responsible for what gets deleted.**";
+"By using OpenMacStorage you agree:" = "By using OpenMacStorage you agree:";
+"This software is provided **\"as is\"**, without warranty of any kind (MIT License)." = "This software is provided **\"as is\"**, without warranty of any kind (MIT License).";
+"The author is **not liable** for any data loss, broken applications, or system issues caused by using this app." = "The author is **not liable** for any data loss, broken applications, or system issues caused by using this app.";
+"You will keep recent backups (Time Machine or similar) before running cleanup operations." = "You will keep recent backups (Time Machine or similar) before running cleanup operations.";
+"You will review what is about to be deleted before confirming." = "You will review what is about to be deleted before confirming.";
+"This app was built with AI assistance by a non-professional developer. The source code is open and auditable on GitHub — please review it if your situation requires it." = "This app was built with AI assistance by a non-professional developer. The source code is open and auditable on GitHub — please review it if your situation requires it.";
+"Operations that **cannot be undone**:" = "Operations that **cannot be undone**:";
+"Empty Contents on directories" = "Empty Contents on directories";
+"Deleting APFS local snapshots" = "Deleting APFS local snapshots";
+"Deleting Xcode DerivedData, archives, or simulators" = "Deleting Xcode DerivedData, archives, or simulators";
+"Permanently removing application support / cache files via Uninstall App" = "Permanently removing application support / cache files via Uninstall App";
+"I understand and accept these terms." = "I understand and accept these terms.";
+"Quit" = "Quit";
+"Continue" = "Continue";
+"Close" = "Close";

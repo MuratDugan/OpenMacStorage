@@ -1,0 +1,129 @@
+/* 日本語 — Japanese */
+
+"Storage" = "ストレージ";
+"Home" = "ホーム";
+"Whole Disk" = "ディスク全体";
+"Choose Folder…" = "フォルダを選択…";
+"Select a folder to scan" = "スキャンするフォルダを選択";
+"Scan" = "スキャン";
+"Stop" = "停止";
+
+"Overview" = "概要";
+"Browse" = "ブラウズ";
+"Treemap" = "ツリーマップ";
+"Search" = "検索";
+"Tools" = "ツール";
+"Duplicates" = "重複";
+"Old Downloads" = "古いダウンロード";
+"Uninstall App" = "Appを削除";
+"What Grew?" = "増えたもの";
+"File Types" = "ファイルの種類";
+"Diagnostics" = "診断";
+"System Data" = "システムデータ";
+"Cleanup" = "クリーンアップ";
+"Disk" = "ディスク";
+"%@ used" = "%@ 使用中";
+"%@ free" = "%@ 空き";
+
+"Applications" = "アプリケーション";
+"Xcode & Developer" = "Xcodeと開発者";
+"Virtual Machines" = "仮想マシン";
+"Caches" = "キャッシュ";
+"Logs" = "ログ";
+"Mail" = "メール";
+"Photos" = "写真";
+"Music" = "ミュージック";
+"Videos" = "ビデオ";
+"Documents" = "書類";
+"Downloads" = "ダウンロード";
+"Trash" = "ゴミ箱";
+"APFS Snapshots" = "APFSスナップショット";
+"macOS System" = "macOSシステム";
+"iCloud Drive" = "iCloud Drive";
+"Other" = "その他";
+
+"Total" = "合計";
+"Files" = "ファイル";
+"Folders" = "フォルダ";
+"Free" = "空き";
+"By Category" = "カテゴリ別";
+"No data" = "データなし";
+"Top 15 Items" = "上位15項目";
+"No scan yet" = "スキャン未実行";
+"Scan Now" = "今すぐスキャン";
+"Cancelled." = "キャンセルされました。";
+
+"Name" = "名前";
+"Size" = "サイズ";
+"Share" = "割合";
+"Kind" = "種類";
+"Contents" = "内容";
+"%lld files" = "%lld ファイル";
+"Filter in this folder" = "このフォルダで絞り込む";
+"Move to Trash" = "ゴミ箱に入れる";
+"Cancel" = "キャンセル";
+"Move" = "移動";
+"Error" = "エラー";
+"OK" = "OK";
+"Show in Finder" = "Finderで表示";
+"Copy Path" = "パスをコピー";
+"Preview (Space)" = "プレビュー(スペース)";
+
+"Up" = "上へ";
+"Root" = "ルート";
+"Depth: %lld" = "深さ:%lld";
+"Drill In" = "中に入る";
+
+"All" = "すべて";
+"%lld results" = "%lld 件";
+"No results" = "結果なし";
+"Min size" = "最小サイズ";
+"Unlimited" = "制限なし";
+"Include folders" = "フォルダを含める";
+"Category" = "カテゴリ";
+"Path" = "パス";
+
+"Duplicate Files" = "重複ファイル";
+"Total wasted: %@" = "無駄合計:%@";
+"%lld copies × %@" = "%lld コピー × %@";
+"Wasted: %@" = "無駄:%@";
+"Completed" = "完了";
+
+"Older than:" = "次より古い:";
+"%lld days" = "%lld 日";
+"Refresh" = "更新";
+"Modified" = "変更日";
+"Action" = "操作";
+
+"Analyzing…" = "分析中…";
+"Select All" = "すべて選択";
+"Deselect All" = "選択解除";
+"Confirm Uninstall" = "削除を確認";
+
+"Filter" = "フィルタ";
+"Grew" = "増加";
+"Added" = "追加";
+"Shrank" = "減少";
+"Removed" = "削除済み";
+"Folder" = "フォルダ";
+"Before" = "前";
+"Now" = "現在";
+
+"Calculating…" = "計算中…";
+"Extension" = "拡張子";
+"Total Size" = "合計サイズ";
+"Average" = "平均";
+
+"Where Did System Data Go?" = "システムデータはどこへ?";
+"Computed" = "計算済み";
+"Components" = "構成要素";
+"Cleanable" = "クリーン可";
+"Open in Finder" = "Finderで開く";
+"Empty Contents" = "中身を空に";
+
+"Re-measure" = "再計測";
+"Empty Trash" = "ゴミ箱を空に";
+"Continue" = "続ける";
+"History" = "履歴";
+"Freed: %@" = "解放:%@";
+"Done" = "完了";

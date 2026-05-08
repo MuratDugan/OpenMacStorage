@@ -1,0 +1,144 @@
+/* Español — Spanish */
+
+"Storage" = "Almacenamiento";
+"Home" = "Inicio";
+"Whole Disk" = "Disco completo";
+"Choose Folder…" = "Elegir carpeta…";
+"Select a folder to scan" = "Selecciona una carpeta para escanear";
+"Scan" = "Escanear";
+"Stop" = "Detener";
+
+"Overview" = "Resumen";
+"Browse" = "Explorar";
+"Treemap" = "Mapa de árbol";
+"Search" = "Buscar";
+"Tools" = "Herramientas";
+"Duplicates" = "Duplicados";
+"Old Downloads" = "Descargas antiguas";
+"Uninstall App" = "Desinstalar app";
+"What Grew?" = "¿Qué creció?";
+"File Types" = "Tipos de archivo";
+"Diagnostics" = "Diagnóstico";
+"System Data" = "Datos del sistema";
+"Cleanup" = "Limpieza";
+"Disk" = "Disco";
+"%@ used" = "%@ usado";
+"%@ free" = "%@ libre";
+
+"Applications" = "Aplicaciones";
+"Xcode & Developer" = "Xcode y desarrollador";
+"Virtual Machines" = "Máquinas virtuales";
+"Caches" = "Cachés";
+"Logs" = "Registros";
+"Mail" = "Correo";
+"Photos" = "Fotos";
+"Music" = "Música";
+"Videos" = "Vídeos";
+"Documents" = "Documentos";
+"Downloads" = "Descargas";
+"Trash" = "Papelera";
+"APFS Snapshots" = "Instantáneas APFS";
+"macOS System" = "Sistema macOS";
+"iCloud Drive" = "iCloud Drive";
+"Other" = "Otro";
+
+"Total" = "Total";
+"Files" = "Archivos";
+"Folders" = "Carpetas";
+"Free" = "Libre";
+"By Category" = "Por categoría";
+"No data" = "Sin datos";
+"Top 15 Items" = "Los 15 mayores";
+"No scan yet" = "Sin escaneo";
+"Scan Now" = "Escanear ahora";
+"Last scan: **%@** — press **Scan** to refresh." = "Último escaneo: **%@** — pulsa **Escanear** para actualizar.";
+"Choose a folder and press **Scan** to begin." = "Elige una carpeta y pulsa **Escanear** para empezar.";
+"Scan complete — %@ s" = "Escaneo completado — %@ s";
+"Cancelled." = "Cancelado.";
+"Error: %@" = "Error: %@";
+
+"Name" = "Nombre";
+"Size" = "Tamaño";
+"Share" = "Proporción";
+"Kind" = "Tipo";
+"Contents" = "Contenido";
+"%lld files" = "%lld archivos";
+"Filter in this folder" = "Filtrar en esta carpeta";
+"%lld selected — %@" = "%lld seleccionados — %@";
+"Trash (%lld)" = "Papelera (%lld)";
+"Move to Trash" = "Mover a la Papelera";
+"Cancel" = "Cancelar";
+"Move" = "Mover";
+"Error" = "Error";
+"OK" = "OK";
+"Show in Finder" = "Mostrar en el Finder";
+"Copy Path" = "Copiar ruta";
+"Preview (Space)" = "Vista previa (Espacio)";
+
+"Up" = "Arriba";
+"Root" = "Raíz";
+"Depth: %lld" = "Profundidad: %lld";
+"Drill In" = "Entrar";
+
+"All" = "Todos";
+"%lld results" = "%lld resultados";
+"No results" = "Sin resultados";
+"Min size" = "Tamaño mín.";
+"Unlimited" = "Sin límite";
+"Include folders" = "Incluir carpetas";
+"Category" = "Categoría";
+"Path" = "Ruta";
+
+"Duplicate Files" = "Archivos duplicados";
+"Total wasted: %@" = "Espacio perdido total: %@";
+"Min size:" = "Tamaño mín.:";
+"%lld copies × %@" = "%lld copias × %@";
+"Wasted: %@" = "Perdido: %@";
+"Starting" = "Iniciando";
+"Candidate size groups" = "Grupos candidatos por tamaño";
+"Head-hash (first 64 KB)" = "Hash inicial (primeros 64 KB)";
+"Full SHA-1" = "SHA-1 completo";
+"Completed" = "Completado";
+
+"Older than:" = "Más antiguo que:";
+"%lld days" = "%lld días";
+"Refresh" = "Actualizar";
+"Modified" = "Modificado";
+"Action" = "Acción";
+
+"Analyzing…" = "Analizando…";
+"App body: %@" = "Cuerpo de la app: %@";
+"Select All" = "Seleccionar todo";
+"Deselect All" = "Anular selección";
+"Move App + Selected to Trash" = "Mover app + seleccionados a la Papelera";
+"Confirm Uninstall" = "Confirmar desinstalación";
+
+"Filter" = "Filtro";
+"Grew" = "Creció";
+"Added" = "Añadidos";
+"Shrank" = "Disminuyó";
+"Removed" = "Eliminados";
+"Folder" = "Carpeta";
+"Before" = "Antes";
+"Now" = "Ahora";
+
+"Calculating…" = "Calculando…";
+"Extension" = "Extensión";
+"Total Size" = "Tamaño total";
+"Average" = "Media";
+
+"Where Did System Data Go?" = "¿A dónde fueron los datos del sistema?";
+"Computed" = "Calculado";
+"Components" = "Componentes";
+"Cleanable" = "Limpiable";
+"Open in Finder" = "Abrir en el Finder";
+"Empty Contents" = "Vaciar contenido";
+
+"Re-measure" = "Volver a medir";
+"Old Simulators" = "Simuladores antiguos";
+"App Logs" = "Registros de app";
+"Empty Trash" = "Vaciar Papelera";
+"Continue" = "Continuar";
+"History" = "Historial";
+"Freed: %@" = "Liberado: %@";
+"Done" = "Hecho";

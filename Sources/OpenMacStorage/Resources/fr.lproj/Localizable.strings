@@ -1,0 +1,129 @@
+/* Français — French */
+
+"Storage" = "Stockage";
+"Home" = "Dossier perso";
+"Whole Disk" = "Disque entier";
+"Choose Folder…" = "Choisir un dossier…";
+"Select a folder to scan" = "Choisir un dossier à analyser";
+"Scan" = "Analyser";
+"Stop" = "Arrêter";
+
+"Overview" = "Vue d'ensemble";
+"Browse" = "Parcourir";
+"Treemap" = "Arborescence";
+"Search" = "Rechercher";
+"Tools" = "Outils";
+"Duplicates" = "Doublons";
+"Old Downloads" = "Anciens téléchargements";
+"Uninstall App" = "Désinstaller l'app";
+"What Grew?" = "Qu'est-ce qui a grossi ?";
+"File Types" = "Types de fichier";
+"Diagnostics" = "Diagnostics";
+"System Data" = "Données système";
+"Cleanup" = "Nettoyage";
+"Disk" = "Disque";
+"%@ used" = "%@ utilisé";
+"%@ free" = "%@ libre";
+
+"Applications" = "Applications";
+"Xcode & Developer" = "Xcode & développeur";
+"Virtual Machines" = "Machines virtuelles";
+"Caches" = "Caches";
+"Logs" = "Journaux";
+"Mail" = "Mail";
+"Photos" = "Photos";
+"Music" = "Musique";
+"Videos" = "Vidéos";
+"Documents" = "Documents";
+"Downloads" = "Téléchargements";
+"Trash" = "Corbeille";
+"APFS Snapshots" = "Instantanés APFS";
+"macOS System" = "Système macOS";
+"iCloud Drive" = "iCloud Drive";
+"Other" = "Autre";
+
+"Total" = "Total";
+"Files" = "Fichiers";
+"Folders" = "Dossiers";
+"Free" = "Libre";
+"By Category" = "Par catégorie";
+"No data" = "Aucune donnée";
+"Top 15 Items" = "Top 15";
+"No scan yet" = "Pas d'analyse";
+"Scan Now" = "Analyser maintenant";
+"Cancelled." = "Annulé.";
+
+"Name" = "Nom";
+"Size" = "Taille";
+"Share" = "Part";
+"Kind" = "Type";
+"Contents" = "Contenu";
+"%lld files" = "%lld fichiers";
+"Filter in this folder" = "Filtrer dans ce dossier";
+"Move to Trash" = "Mettre à la Corbeille";
+"Cancel" = "Annuler";
+"Move" = "Déplacer";
+"Error" = "Erreur";
+"OK" = "OK";
+"Show in Finder" = "Afficher dans le Finder";
+"Copy Path" = "Copier le chemin";
+"Preview (Space)" = "Aperçu (Espace)";
+
+"Up" = "Haut";
+"Root" = "Racine";
+"Depth: %lld" = "Profondeur : %lld";
+"Drill In" = "Entrer";
+
+"All" = "Tous";
+"%lld results" = "%lld résultats";
+"No results" = "Aucun résultat";
+"Min size" = "Taille min";
+"Unlimited" = "Illimité";
+"Include folders" = "Inclure les dossiers";
+"Category" = "Catégorie";
+"Path" = "Chemin";
+
+"Duplicate Files" = "Fichiers en double";
+"Total wasted: %@" = "Gaspillé au total : %@";
+"%lld copies × %@" = "%lld copies × %@";
+"Wasted: %@" = "Gaspillé : %@";
+"Completed" = "Terminé";
+
+"Older than:" = "Plus vieux que :";
+"%lld days" = "%lld jours";
+"Refresh" = "Actualiser";
+"Modified" = "Modifié";
+"Action" = "Action";
+
+"Analyzing…" = "Analyse en cours…";
+"Select All" = "Tout sélectionner";
+"Deselect All" = "Tout désélectionner";
+"Confirm Uninstall" = "Confirmer la désinstallation";
+
+"Filter" = "Filtre";
+"Grew" = "Grossi";
+"Added" = "Ajouté";
+"Shrank" = "Réduit";
+"Removed" = "Supprimé";
+"Folder" = "Dossier";
+"Before" = "Avant";
+"Now" = "Maintenant";
+
+"Calculating…" = "Calcul en cours…";
+"Extension" = "Extension";
+"Total Size" = "Taille totale";
+"Average" = "Moyenne";
+
+"Where Did System Data Go?" = "Où sont passées les données système ?";
+"Computed" = "Calculé";
+"Components" = "Composants";
+"Cleanable" = "Nettoyable";
+"Open in Finder" = "Ouvrir dans le Finder";
+"Empty Contents" = "Vider le contenu";
+
+"Re-measure" = "Recalculer";
+"Empty Trash" = "Vider la Corbeille";
+"Continue" = "Continuer";
+"History" = "Historique";
+"Freed: %@" = "Libéré : %@";
+"Done" = "Terminé";

@@ -1,0 +1,129 @@
+/* Русский — Russian */
+
+"Storage" = "Хранилище";
+"Home" = "Домой";
+"Whole Disk" = "Весь диск";
+"Choose Folder…" = "Выбрать папку…";
+"Select a folder to scan" = "Выберите папку для сканирования";
+"Scan" = "Сканировать";
+"Stop" = "Стоп";
+
+"Overview" = "Обзор";
+"Browse" = "Обзор папок";
+"Treemap" = "Карта";
+"Search" = "Поиск";
+"Tools" = "Инструменты";
+"Duplicates" = "Дубликаты";
+"Old Downloads" = "Старые загрузки";
+"Uninstall App" = "Удалить приложение";
+"What Grew?" = "Что выросло?";
+"File Types" = "Типы файлов";
+"Diagnostics" = "Диагностика";
+"System Data" = "Системные данные";
+"Cleanup" = "Очистка";
+"Disk" = "Диск";
+"%@ used" = "%@ занято";
+"%@ free" = "%@ свободно";
+
+"Applications" = "Программы";
+"Xcode & Developer" = "Xcode и разработка";
+"Virtual Machines" = "Виртуальные машины";
+"Caches" = "Кэши";
+"Logs" = "Журналы";
+"Mail" = "Почта";
+"Photos" = "Фото";
+"Music" = "Музыка";
+"Videos" = "Видео";
+"Documents" = "Документы";
+"Downloads" = "Загрузки";
+"Trash" = "Корзина";
+"APFS Snapshots" = "Снимки APFS";
+"macOS System" = "Система macOS";
+"iCloud Drive" = "iCloud Drive";
+"Other" = "Другое";
+
+"Total" = "Всего";
+"Files" = "Файлы";
+"Folders" = "Папки";
+"Free" = "Свободно";
+"By Category" = "По категориям";
+"No data" = "Нет данных";
+"Top 15 Items" = "Топ-15";
+"No scan yet" = "Ещё не сканировали";
+"Scan Now" = "Сканировать сейчас";
+"Cancelled." = "Отменено.";
+
+"Name" = "Имя";
+"Size" = "Размер";
+"Share" = "Доля";
+"Kind" = "Тип";
+"Contents" = "Содержимое";
+"%lld files" = "%lld файлов";
+"Filter in this folder" = "Фильтр в этой папке";
+"Move to Trash" = "В Корзину";
+"Cancel" = "Отмена";
+"Move" = "Переместить";
+"Error" = "Ошибка";
+"OK" = "OK";
+"Show in Finder" = "Показать в Finder";
+"Copy Path" = "Скопировать путь";
+"Preview (Space)" = "Просмотр (пробел)";
+
+"Up" = "Вверх";
+"Root" = "Корень";
+"Depth: %lld" = "Глубина: %lld";
+"Drill In" = "Войти";
+
+"All" = "Все";
+"%lld results" = "Результатов: %lld";
+"No results" = "Нет результатов";
+"Min size" = "Мин. размер";
+"Unlimited" = "Без ограничений";
+"Include folders" = "Включая папки";
+"Category" = "Категория";
+"Path" = "Путь";
+
+"Duplicate Files" = "Дубликаты файлов";
+"Total wasted: %@" = "Всего потеряно: %@";
+"%lld copies × %@" = "%lld копий × %@";
+"Wasted: %@" = "Потеряно: %@";
+"Completed" = "Готово";
+
+"Older than:" = "Старше:";
+"%lld days" = "%lld дней";
+"Refresh" = "Обновить";
+"Modified" = "Изменён";
+"Action" = "Действие";
+
+"Analyzing…" = "Анализ…";
+"Select All" = "Выбрать всё";
+"Deselect All" = "Снять выбор";
+"Confirm Uninstall" = "Подтвердить удаление";
+
+"Filter" = "Фильтр";
+"Grew" = "Выросло";
+"Added" = "Добавлено";
+"Shrank" = "Уменьшилось";
+"Removed" = "Удалено";
+"Folder" = "Папка";
+"Before" = "Было";
+"Now" = "Стало";
+
+"Calculating…" = "Вычисление…";
+"Extension" = "Расширение";
+"Total Size" = "Общий размер";
+"Average" = "В среднем";
+
+"Where Did System Data Go?" = "Куда делись системные данные?";
+"Computed" = "Подсчитано";
+"Components" = "Компоненты";
+"Cleanable" = "Можно очистить";
+"Open in Finder" = "Открыть в Finder";
+"Empty Contents" = "Очистить содержимое";
+
+"Re-measure" = "Пересчитать";
+"Empty Trash" = "Очистить Корзину";
+"Continue" = "Продолжить";
+"History" = "История";
+"Freed: %@" = "Освобождено: %@";
+"Done" = "Готово";
