@@ -23,6 +23,11 @@ mkdir -p dmg-staging
 cp -R "$APP" "dmg-staging/$APP"
 
 if command -v create-dmg >/dev/null 2>&1; then
+  # Branded background (regenerate with scripts/make-dmg-background.swift).
+  BG_ARG=()
+  if [[ -f "assets/dmg-background.png" ]]; then
+    BG_ARG=(--background "assets/dmg-background.png")
+  fi
   create-dmg \
     --volname "$VOL" \
     --window-pos 200 120 \
@@ -32,6 +37,7 @@ if command -v create-dmg >/dev/null 2>&1; then
     --hide-extension "$APP" \
     --app-drop-link 475 200 \
     --no-internet-enable \
+    "${BG_ARG[@]}" \
     "$DMG" \
     "dmg-staging/" 2>&1 | tail -8
 else
