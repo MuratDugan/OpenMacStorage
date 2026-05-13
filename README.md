@@ -6,6 +6,27 @@ subscriptions, no nags, no telemetry.
 
 Think **WizTree-meets-CleanMyMac**, written in Swift, MIT-licensed.
 
+<!-- Screenshots — drop them in docs/screenshots/ and they'll render here.
+![Overview](docs/screenshots/overview.png)
+![Treemap](docs/screenshots/treemap.png)
+-->
+
+## Install
+
+Grab the latest **`OpenMacStorage.dmg`** from the
+[Releases page](https://github.com/MuratDugan/OpenMacStorage/releases) and drag
+the app into Applications.
+
+Because the app isn't notarized by Apple's developer programme, macOS will
+warn you the first time you open it. Either:
+
+1. **Right-click → Open** in Finder (instead of double-clicking), or
+2. After the warning, go to **System Settings → Privacy & Security** and click
+   **Open Anyway**.
+
+This is the standard Gatekeeper flow for open-source apps; the source code is
+right here in this repo if you want to verify it before running.
+
 ## About this project (a note from the author)
 
 I'm a MacBook user, not a professional developer. I built OpenMacStorage
@@ -82,13 +103,16 @@ are very welcome — see [CONTRIBUTING.md](CONTRIBUTING.md).
 - Full Disk Access (System Settings → Privacy & Security) to scan inside
   `~/Library`, Mail, Messages, etc.
 
-## Build & run
+## Build from source
 
 ```sh
 git clone https://github.com/MuratDugan/OpenMacStorage
 cd OpenMacStorage
-./scripts/make-app.sh
+./scripts/make-app.sh           # produces OpenMacStorage.app
 open OpenMacStorage.app
+
+# Or build a distributable DMG (requires `brew install create-dmg`):
+./scripts/make-dmg.sh           # produces OpenMacStorage.dmg
 ```
 
 Or open `Package.swift` in Xcode and run.
