@@ -22,8 +22,8 @@ struct OpenMacStorageApp: App {
     @NSApplicationDelegateAdaptor(AppDelegate.self) var appDelegate
     @State private var model = ScanModel()
 
-    private static let githubURL = URL(string: "https://github.com/muratdugan/OpenMacStorage")!
-    private static let issuesURL = URL(string: "https://github.com/muratdugan/OpenMacStorage/issues/new")!
+    private static let githubURL = URL(string: "https://github.com/MuratDugan/OpenMacStorage")!
+    private static let issuesURL = URL(string: "https://github.com/MuratDugan/OpenMacStorage/issues/new")!
 
     /// Languages exposed in the menubar's Language submenu. Each is shown in
     /// its own native name (Apple convention).
@@ -109,7 +109,7 @@ struct OpenMacStorageApp: App {
         )
         creditsString.append(body)
 
-        let linkText = "github.com/muratdugan/OpenMacStorage"
+        let linkText = "github.com/MuratDugan/OpenMacStorage"
         let link = NSAttributedString(
             string: linkText,
             attributes: [

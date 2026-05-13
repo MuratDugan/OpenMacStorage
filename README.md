@@ -85,7 +85,7 @@ are very welcome — see [CONTRIBUTING.md](CONTRIBUTING.md).
 ## Build & run
 
 ```sh
-git clone https://github.com/muratdugan/OpenMacStorage
+git clone https://github.com/MuratDugan/OpenMacStorage
 cd OpenMacStorage
 ./scripts/make-app.sh
 open OpenMacStorage.app

@@ -12,7 +12,7 @@ struct SearchView: View {
     @State private var mode: SearchMode = .name
     @State private var kindFilter: FileIconInfo.KindGroup = .all
     @State private var minMB: Double = 0
-    @State private var sort: SortKey = .sizeDesc
+    @State private var sort: SortKey = .relevance
     @State private var results: [FileNode] = []
     @State private var totalMatched: Int = 0
     @State private var elapsedMs: Double = 0
@@ -57,15 +57,16 @@ struct SearchView: View {
     }
 
     enum SortKey: String, CaseIterable, Identifiable {
-        case sizeDesc, sizeAsc, nameAsc, nameDesc, pathAsc
+        case relevance, sizeDesc, sizeAsc, nameAsc, nameDesc, pathAsc
         var id: String { rawValue }
         var label: LocalizedStringKey {
             switch self {
-            case .sizeDesc: "Size: largest"
-            case .sizeAsc:  "Size: smallest"
-            case .nameAsc:  "Name A → Z"
-            case .nameDesc: "Name Z → A"
-            case .pathAsc:  "Path A → Z"
+            case .relevance: "Best match"
+            case .sizeDesc:  "Size: largest"
+            case .sizeAsc:   "Size: smallest"
+            case .nameAsc:   "Name A → Z"
+            case .nameDesc:  "Name Z → A"
+            case .pathAsc:   "Path A → Z"
             }
         }
     }
@@ -531,10 +532,15 @@ struct SearchView: View {
         regexError = nil
         searching = true
         let started = Date()
+        let queryForRanking = q.lowercased()
         Task.detached(priority: .userInitiated) {
             var hits: [FileNode] = []
             collect(node: root, matcher: matcher, kind: kind, minBytes: bytes, into: &hits)
-            sortHits(&hits, by: sortKey)
+            if sortKey == .relevance && !queryForRanking.isEmpty {
+                sortByRelevance(&hits, query: queryForRanking)
+            } else {
+                sortHits(&hits, by: sortKey)
+            }
             let elapsed = Date().timeIntervalSince(started) * 1000
             let snapshot = hits
             await MainActor.run {
@@ -551,7 +557,12 @@ struct SearchView: View {
 
     private func resort() {
         var copy = results
-        sortHits(&copy, by: sort)
+        let q = query.trimmingCharacters(in: .whitespaces).lowercased()
+        if sort == .relevance && !q.isEmpty {
+            sortByRelevance(&copy, query: q)
+        } else {
+            sortHits(&copy, by: sort)
+        }
         results = copy
         page = 0
     }
@@ -620,12 +631,87 @@ struct SearchView: View {
 
     private nonisolated func sortHits(_ hits: inout [FileNode], by key: SortKey) {
         switch key {
+        case .relevance:
+            // Relevance is computed against the current query — done at call site.
+            // Fall back to size if no query is set.
+            hits.sort { $0.size > $1.size }
         case .sizeDesc: hits.sort { $0.size > $1.size }
         case .sizeAsc:  hits.sort { $0.size < $1.size }
         case .nameAsc:  hits.sort { $0.name.localizedCaseInsensitiveCompare($1.name) == .orderedAscending }
         case .nameDesc: hits.sort { $0.name.localizedCaseInsensitiveCompare($1.name) == .orderedDescending }
         case .pathAsc:  hits.sort { $0.path.localizedCaseInsensitiveCompare($1.path) == .orderedAscending }
         }
+    }
+
+    /// Sort hits by how relevant they are to `query`. Higher score wins.
+    ///
+    /// Signals (in order of strength):
+    ///   • Whole query is a substring of the name.
+    ///   • That substring starts at the name's beginning, or right after a word
+    ///     boundary (space / `-` / `_` / `.`).
+    ///   • All tokens are substrings of the name (regardless of order).
+    ///   • Tokens are only matched via subsequence (weakest signal).
+    /// Then we add a small bonus for shorter names — among items that match
+    /// equally well, the more specific filename wins.
+    private nonisolated func sortByRelevance(_ hits: inout [FileNode], query: String) {
+        let q = query.lowercased()
+        let tokens = q.split(whereSeparator: { $0.isWhitespace }).map(String.init)
+        // Tie-breaker fallback to size desc.
+        hits.sort { a, b in
+            let sa = Self.relevanceScore(name: a.name.lowercased(), path: a.path.lowercased(),
+                                         query: q, tokens: tokens)
+            let sb = Self.relevanceScore(name: b.name.lowercased(), path: b.path.lowercased(),
+                                         query: q, tokens: tokens)
+            if sa != sb { return sa > sb }
+            return a.size > b.size
+        }
+    }
+
+    fileprivate static func relevanceScore(name: String, path: String,
+                                           query: String, tokens: [String]) -> Int {
+        // Equal-string match → best possible.
+        if name == query { return 100_000 }
+
+        var score = 0
+
+        // 1. Whole query as substring of the name.
+        if let r = name.range(of: query) {
+            score += 4_000
+            if r.lowerBound == name.startIndex {
+                score += 800
+            } else {
+                let before = name[name.index(before: r.lowerBound)]
+                if "-_. /".contains(before) { score += 400 }
+            }
+        }
+
+        // 2. Per-token name hits.
+        var tokensFoundInName = 0
+        for token in tokens where !token.isEmpty {
+            if let r = name.range(of: token) {
+                tokensFoundInName += 1
+                score += 600
+                if r.lowerBound == name.startIndex {
+                    score += 200
+                } else {
+                    let before = name[name.index(before: r.lowerBound)]
+                    if "-_. /".contains(before) { score += 80 }
+                }
+            } else if SearchMatcher.fuzzyContains(token: token, in: name) {
+                score += 100   // subsequence only — weak
+            } else if path.contains(token) {
+                score += 30    // path-only token match — weakest
+            }
+        }
+
+        // 3. Reward when every token landed in the name as a real substring.
+        if !tokens.isEmpty && tokensFoundInName == tokens.count {
+            score += 500
+        }
+
+        // 4. Penalise long names slightly so close matches outrank distant ones.
+        score -= name.count / 4
+        return score
     }
 
     /// Smart matcher for Name/Path modes:

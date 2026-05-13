@@ -515,6 +515,7 @@
 "Scanning the tree…" = "Ağaç taranıyor…";
 "auto: wildcard" = "otomatik: joker";
 "auto: extension" = "otomatik: uzantı";
+"Best match" = "En uygun";
 
 /* App menu / About / Help / Settings */
 "About OpenMacStorage" = "OpenMacStorage Hakkında";

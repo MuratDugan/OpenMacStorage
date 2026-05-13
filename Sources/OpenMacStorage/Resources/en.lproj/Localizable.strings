@@ -497,6 +497,7 @@
 "Scanning the tree…" = "Scanning the tree…";
 "auto: wildcard" = "auto: wildcard";
 "auto: extension" = "auto: extension";
+"Best match" = "Best match";
 
 /* App menu / About / Help / Settings */
 "About OpenMacStorage" = "About OpenMacStorage";
