@@ -37,6 +37,10 @@ enum FastScanner {
         let workerCount = max(2, min(8, ProcessInfo.processInfo.activeProcessorCount))
         let group = DispatchGroup()
 
+        // Knowing the scan root lets us tell "scanning the system" apart from
+        // "user picked /Volumes/SomeDrive" — we only skip /Volumes/* in the
+        // first case (otherwise external drives get an empty 0-file scan).
+        let scanRoot = root
         for _ in 0..<workerCount {
             group.enter()
             DispatchQueue.global(qos: .userInitiated).async {
@@ -44,6 +48,7 @@ enum FastScanner {
                     scanOneDirectory(path: path,
                                      node: node,
                                      queue: queue,
+                                     scanRoot: scanRoot,
                                      counters: counters,
                                      isCancelled: isCancelled)
                     queue.finishedJob()
@@ -62,6 +67,7 @@ enum FastScanner {
     private static func scanOneDirectory(path: String,
                                          node: FileNode,
                                          queue: WorkQueue,
+                                         scanRoot: String,
                                          counters: Counters,
                                          isCancelled: @escaping @Sendable () -> Bool) {
         let fd = open(path, O_RDONLY | O_DIRECTORY, 0)
@@ -153,7 +159,7 @@ enum FastScanner {
                 node.children.append(child)
 
                 if isDir {
-                    if !shouldSkip(path: childPath) {
+                    if !shouldSkip(path: childPath, scanRoot: scanRoot) {
                         newSubdirs.append((childPath, child))
                     }
                 } else {
@@ -185,10 +191,17 @@ enum FastScanner {
         node.dirCount = 1 + dirs
     }
 
-    private static func shouldSkip(path: String) -> Bool {
+    /// Subtrees the scanner refuses to recurse into. The /Volumes/ rule is
+    /// conditional: when the user explicitly picks an external drive as the
+    /// scan root (e.g. /Volumes/STRIX ARION), we keep descending; we only
+    /// avoid /Volumes/* when scanning the system itself (root = "/") so
+    /// external drives don't get double-counted into the main report.
+    private static func shouldSkip(path: String, scanRoot: String) -> Bool {
         if path == "/System/Volumes/Data" { return true }
-        if path.hasPrefix("/Volumes/") { return true }
         if path.hasPrefix("/dev") || path.hasPrefix("/proc") || path == "/private/var/vm" { return true }
+        if path.hasPrefix("/Volumes/") && !scanRoot.hasPrefix("/Volumes/") {
+            return true
+        }
         return false
     }
 }

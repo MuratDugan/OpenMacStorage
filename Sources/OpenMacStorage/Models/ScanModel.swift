@@ -21,12 +21,27 @@ final class ScanModel {
     var categoryTotals: [StorageCategory: Int64] = [:]
     var lastScanDate: Date?
 
-    var rootCandidates: [String] = [
-        NSString(string: "~").expandingTildeInPath,
-        "/Applications",
-        "/Library",
-        "/"
-    ]
+    /// Built-in quick picks plus any external volume currently mounted under
+    /// `/Volumes/`. Mounted volumes are detected dynamically so plugging in a
+    /// drive and reopening the menu shows it without restarting the app.
+    var rootCandidates: [String] {
+        var picks: [String] = [
+            NSString(string: "~").expandingTildeInPath,
+            "/Applications",
+            "/Library",
+            "/"
+        ]
+        if let entries = try? FileManager.default.contentsOfDirectory(atPath: "/Volumes") {
+            // Skip hidden / synthetic links; sort alphabetically for stable UI.
+            for name in entries.sorted() where !name.hasPrefix(".") {
+                let p = "/Volumes/\(name)"
+                // /Volumes/Macintosh HD is the same as / on most Macs.
+                if name == "Macintosh HD" { continue }
+                picks.append(p)
+            }
+        }
+        return picks
+    }
     var currentRoot: String = NSString(string: "~").expandingTildeInPath
 
     private var cancelFlag = ManagedAtomicBool()
