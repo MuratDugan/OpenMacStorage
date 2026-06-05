@@ -9,7 +9,14 @@ struct OverviewView: View {
             VStack(alignment: .leading, spacing: 24) {
                 header
                 if model.rootNode == nil {
-                    emptyState
+                    // While the first scan is running we don't have a tree yet —
+                    // show a busy panel instead of the "No scan yet" CTA so the
+                    // user doesn't think we're idle while taking 5+ minutes.
+                    if case let .scanning(path, bytes, files) = model.phase {
+                        scanningState(path: path, bytes: bytes, files: files)
+                    } else {
+                        emptyState
+                    }
                 } else {
                     summaryCards
                     categoryChart
@@ -18,6 +25,42 @@ struct OverviewView: View {
             }
             .padding(28)
             .frame(maxWidth: .infinity, alignment: .leading)
+        }
+    }
+
+    private func scanningState(path: String, bytes: Int64, files: Int) -> some View {
+        VStack(spacing: 16) {
+            ProgressView()
+                .controlSize(.large)
+                .scaleEffect(1.4)
+                .padding(.bottom, 4)
+            Text("Scanning…").font(.title2.bold())
+            HStack(spacing: 20) {
+                stat(symbol: "doc.fill", value: "\(files) files")
+                stat(symbol: "scalemass", value: ByteFormatter.string(bytes))
+            }
+            Text(path)
+                .font(.caption.monospaced())
+                .foregroundStyle(.tertiary)
+                .lineLimit(1)
+                .truncationMode(.middle)
+                .frame(maxWidth: 620)
+            Text("Big disks can take a few minutes. The window stays responsive — feel free to switch tabs while it runs.")
+                .font(.caption)
+                .foregroundStyle(.secondary)
+                .multilineTextAlignment(.center)
+                .frame(maxWidth: 480)
+                .padding(.top, 4)
+        }
+        .frame(maxWidth: .infinity)
+        .padding(.vertical, 60)
+    }
+
+    private func stat(symbol: String, value: String) -> some View {
+        HStack(spacing: 6) {
+            Image(systemName: symbol).foregroundStyle(.secondary)
+            Text(value)
+                .font(.callout.monospaced().weight(.medium))
         }
     }
 

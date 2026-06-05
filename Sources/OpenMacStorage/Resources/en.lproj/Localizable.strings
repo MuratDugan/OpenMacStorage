@@ -498,6 +498,8 @@
 "auto: wildcard" = "auto: wildcard";
 "auto: extension" = "auto: extension";
 "Best match" = "Best match";
+"Scanning…" = "Scanning…";
+"Big disks can take a few minutes. The window stays responsive — feel free to switch tabs while it runs." = "Big disks can take a few minutes. The window stays responsive — feel free to switch tabs while it runs.";
 
 /* App menu / About / Help / Settings */
 "About OpenMacStorage" = "About OpenMacStorage";
