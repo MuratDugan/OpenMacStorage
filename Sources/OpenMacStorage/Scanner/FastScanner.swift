@@ -20,6 +20,9 @@ enum FastScanner {
         var bytesScanned: Int64
         var filesScanned: Int
         var currentPath: String
+        /// Seconds since the scan started — lets the UI distinguish "slow but
+        /// progressing" from "stuck", and compute a files/sec throughput.
+        var elapsedSeconds: Double
     }
 
     static func scan(root: String,
@@ -56,7 +59,19 @@ enum FastScanner {
                 group.leave()
             }
         }
+
+        // Side channel: if the user clicks Stop, propagate that into the
+        // queue so workers parked on `cond.wait()` exit immediately instead
+        // of waiting for whatever directory is currently in-flight.
+        let watcher = DispatchSource.makeTimerSource(queue: .global(qos: .utility))
+        watcher.schedule(deadline: .now() + 0.1, repeating: .milliseconds(150))
+        watcher.setEventHandler {
+            if isCancelled() { queue.cancel() }
+        }
+        watcher.resume()
+
         group.wait()
+        watcher.cancel()
 
         aggregate(rootNode)
         return rootNode
@@ -80,6 +95,10 @@ enum FastScanner {
             | attrgroup_t(ATTR_CMN_NAME)
             | attrgroup_t(ATTR_CMN_OBJTYPE)
             | attrgroup_t(ATTR_CMN_ERROR)
+            // Inode number — used to deduplicate hard-linked files (one big
+            // source of over-counting on Xcode + /System), so the reported
+            // total is closer to APFS's "actual blocks used".
+            | attrgroup_t(ATTR_CMN_FILEID)
         attrList.fileattr = attrgroup_t(ATTR_FILE_TOTALSIZE)
             | attrgroup_t(ATTR_FILE_ALLOCSIZE)
 
@@ -109,6 +128,7 @@ enum FastScanner {
                 var name: String = ""
                 var objType: fsobj_type_t = 0
                 var fileSize: Int64 = 0
+                var fileID: UInt64 = 0
 
                 if returned.commonattr & attrgroup_t(ATTR_CMN_NAME) != 0 {
                     let ref = fieldPtr.load(as: attrreference_t.self)
@@ -124,6 +144,11 @@ enum FastScanner {
 
                 if returned.commonattr & attrgroup_t(ATTR_CMN_ERROR) != 0 {
                     fieldPtr = fieldPtr.advanced(by: MemoryLayout<UInt32>.size)
+                }
+
+                if returned.commonattr & attrgroup_t(ATTR_CMN_FILEID) != 0 {
+                    fileID = fieldPtr.load(as: UInt64.self)
+                    fieldPtr = fieldPtr.advanced(by: MemoryLayout<UInt64>.size)
                 }
 
                 // ÖNEMLİ: TOTALSIZE = mantıksal boyut (sparse file'ın "görünürdeki" boyutu).
@@ -150,10 +175,18 @@ enum FastScanner {
                 let childPath = prefix + name
 
                 let category = CategoryClassifier.classify(path: childPath, isDirectory: isDir)
+
+                // Hard-link dedup: a file with N names shouldn't be counted N
+                // times. We claim a fileID on first sight and ignore the size
+                // on subsequent sightings — that way the tree still shows the
+                // path, but the byte total reflects actual disk pressure.
+                let isFreshInode = isDir || fileID == 0 || counters.claim(fileID: fileID)
+                let countedSize: Int64 = (isDir || isFreshInode) ? fileSize : 0
+
                 let child = FileNode(name: name,
                                      path: childPath,
                                      isDirectory: isDir,
-                                     ownSize: isDir ? 0 : fileSize,
+                                     ownSize: isDir ? 0 : countedSize,
                                      category: category)
                 child.parent = node
                 node.children.append(child)
@@ -163,7 +196,7 @@ enum FastScanner {
                         newSubdirs.append((childPath, child))
                     }
                 } else {
-                    localBytes += fileSize
+                    localBytes += countedSize
                     localFiles += 1
                 }
             }
@@ -191,18 +224,45 @@ enum FastScanner {
         node.dirCount = 1 + dirs
     }
 
-    /// Subtrees the scanner refuses to recurse into. The /Volumes/ rule is
-    /// conditional: when the user explicitly picks an external drive as the
-    /// scan root (e.g. /Volumes/STRIX ARION), we keep descending; we only
-    /// avoid /Volumes/* when scanning the system itself (root = "/") so
-    /// external drives don't get double-counted into the main report.
+    /// Subtrees the scanner refuses to recurse into. Three categories:
+    ///
+    /// 1. **System internals** — `/dev`, `/proc`, swap files, the synthetic
+    ///    `/System/Volumes/Data` link. Recursing here either fails or produces
+    ///    junk.
+    /// 2. **Other volumes** — when scanning `/` we skip `/Volumes/*` so external
+    ///    drives don't get rolled into the system report. When the user
+    ///    explicitly picks an external drive as the scan root we keep going.
+    /// 3. **Dev artifacts** — `.venv`, `node_modules` etc. These contain
+    ///    millions of small files restored from `requirements.txt` /
+    ///    `package.json` so they're not useful "what's eating my disk"
+    ///    information. The folder itself still shows up in the tree; we just
+    ///    don't descend into its children.
     private static func shouldSkip(path: String, scanRoot: String) -> Bool {
         if path == "/System/Volumes/Data" { return true }
         if path.hasPrefix("/dev") || path.hasPrefix("/proc") || path == "/private/var/vm" { return true }
         if path.hasPrefix("/Volumes/") && !scanRoot.hasPrefix("/Volumes/") {
             return true
         }
+        if isDevArtifact(path) { return true }
         return false
+    }
+
+    /// Build/dependency folders whose contents are recreated from a manifest
+    /// and which routinely contain hundreds of thousands of small files.
+    private static let devArtifactNames: Set<String> = [
+        ".venv", "venv", ".env",
+        "node_modules",
+        ".tox", "__pypackages__",
+        "Pods",                   // CocoaPods
+        ".gradle", ".m2",         // Gradle, Maven local caches
+        "target",                 // Rust / Maven
+        ".next", ".nuxt",         // JS frameworks
+        ".cache", "__pycache__"
+    ]
+
+    static func isDevArtifact(_ path: String) -> Bool {
+        let last = (path as NSString).lastPathComponent
+        return devArtifactNames.contains(last)
     }
 }
 
@@ -212,6 +272,7 @@ private final class WorkQueue: @unchecked Sendable {
     private let cond = NSCondition()
     private var pending: [(String, FileNode)] = []
     private var active: Int = 0
+    private var cancelled: Bool = false
 
     func push(_ items: [(String, FileNode)]) {
         cond.lock()
@@ -220,15 +281,18 @@ private final class WorkQueue: @unchecked Sendable {
         cond.unlock()
     }
 
-    /// Bir iş döner ve `active` sayacını artırır. Hiç iş yoksa ve hiçbir worker
-    /// aktif değilse `nil` döner — tarama bitmiştir.
+    /// Returns the next directory to scan and bumps `active`. When no work is
+    /// pending and no worker is active anymore, returns nil — the scan is done.
+    /// Also returns nil immediately if `cancel()` has been called so workers
+    /// idling on `cond.wait()` exit promptly when the user hits Stop.
     func pop() -> (String, FileNode)? {
         cond.lock()
         defer { cond.unlock() }
         while pending.isEmpty {
-            if active == 0 { return nil }
+            if active == 0 || cancelled { return nil }
             cond.wait()
         }
+        if cancelled { return nil }
         let item = pending.removeLast()
         active += 1
         return item
@@ -242,6 +306,17 @@ private final class WorkQueue: @unchecked Sendable {
         }
         cond.unlock()
     }
+
+    /// Wake every worker that's parked inside `pop()` so they can return nil
+    /// and exit. Workers that are *inside* a syscall (open, getattrlistbulk)
+    /// can't be interrupted — they'll finish that single directory first —
+    /// but the queue won't hand them new work after Stop.
+    func cancel() {
+        cond.lock()
+        cancelled = true
+        cond.broadcast()
+        cond.unlock()
+    }
 }
 
 private final class Counters: @unchecked Sendable {
@@ -249,10 +324,24 @@ private final class Counters: @unchecked Sendable {
     private var bytes: Int64 = 0
     private var files: Int = 0
     private var lastReport: Date = .distantPast
+    private let startTime: Date = Date()
+    private var seenInodes: Set<UInt64> = []
     private let progress: @Sendable (FastScanner.Progress) -> Void
 
     init(progress: @escaping @Sendable (FastScanner.Progress) -> Void) {
         self.progress = progress
+        // Most home folders have a couple million files; reserve to avoid
+        // repeated rehashing when the set grows.
+        self.seenInodes.reserveCapacity(2_000_000)
+    }
+
+    /// Returns true if this is the first time we've seen `fileID` — in which
+    /// case the caller should add the file size to the running total. Returns
+    /// false for subsequent calls with the same ID (hard-linked file).
+    func claim(fileID: UInt64) -> Bool {
+        os_unfair_lock_lock(&lock)
+        defer { os_unfair_lock_unlock(&lock) }
+        return seenInodes.insert(fileID).inserted
     }
 
     func add(bytes b: Int64, files f: Int, currentPath: String) {
@@ -263,7 +352,10 @@ private final class Counters: @unchecked Sendable {
         let now = Date()
         if now.timeIntervalSince(lastReport) > 0.05 {
             lastReport = now
-            snapshot = .init(bytesScanned: bytes, filesScanned: files, currentPath: currentPath)
+            snapshot = .init(bytesScanned: bytes,
+                             filesScanned: files,
+                             currentPath: currentPath,
+                             elapsedSeconds: now.timeIntervalSince(startTime))
         }
         os_unfair_lock_unlock(&lock)
         if let snap = snapshot { progress(snap) }

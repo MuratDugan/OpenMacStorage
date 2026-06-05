@@ -517,6 +517,8 @@
 "auto: extension" = "otomatik: uzantı";
 "Best match" = "En uygun";
 "Scanning…" = "Taranıyor…";
+"Stop Scan" = "Taramayı Durdur";
+"%lld files/s" = "%lld dosya/s";
 "Big disks can take a few minutes. The window stays responsive — feel free to switch tabs while it runs." = "Büyük diskler birkaç dakika sürebilir. Pencere yanıt vermeye devam eder — bu sırada sekme değiştirebilirsin.";
 
 /* App menu / About / Help / Settings */

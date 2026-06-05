@@ -7,7 +7,7 @@ import SwiftUI
 final class ScanModel {
     enum Phase: Equatable {
         case idle
-        case scanning(path: String, bytes: Int64, files: Int)
+        case scanning(path: String, bytes: Int64, files: Int, elapsed: Double)
         case done(elapsed: TimeInterval)
         case cancelled
         case error(String)
@@ -52,7 +52,7 @@ final class ScanModel {
         let target = root ?? currentRoot
         currentRoot = target
         cancelFlag.set(false)
-        phase = .scanning(path: target, bytes: 0, files: 0)
+        phase = .scanning(path: target, bytes: 0, files: 0, elapsed: 0)
         rootNode = nil
         selectedNode = nil
         categoryTotals = [:]
@@ -89,7 +89,10 @@ final class ScanModel {
 
     fileprivate func applyProgress(_ p: FastScanner.Progress) {
         if case .scanning = phase {
-            phase = .scanning(path: p.currentPath, bytes: p.bytesScanned, files: p.filesScanned)
+            phase = .scanning(path: p.currentPath,
+                              bytes: p.bytesScanned,
+                              files: p.filesScanned,
+                              elapsed: p.elapsedSeconds)
         }
     }
 

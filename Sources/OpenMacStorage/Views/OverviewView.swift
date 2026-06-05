@@ -12,8 +12,8 @@ struct OverviewView: View {
                     // While the first scan is running we don't have a tree yet —
                     // show a busy panel instead of the "No scan yet" CTA so the
                     // user doesn't think we're idle while taking 5+ minutes.
-                    if case let .scanning(path, bytes, files) = model.phase {
-                        scanningState(path: path, bytes: bytes, files: files)
+                    if case let .scanning(path, bytes, files, elapsed) = model.phase {
+                        scanningState(path: path, bytes: bytes, files: files, elapsed: elapsed)
                     } else {
                         emptyState
                     }
@@ -28,8 +28,11 @@ struct OverviewView: View {
         }
     }
 
-    private func scanningState(path: String, bytes: Int64, files: Int) -> some View {
-        VStack(spacing: 16) {
+    private func scanningState(path: String, bytes: Int64, files: Int, elapsed: Double) -> some View {
+        // Files/sec is the easiest "is it actually moving?" signal — if this
+        // stays at 0 for a while you really are stuck.
+        let rate = elapsed > 0.5 ? Double(files) / elapsed : 0
+        return VStack(spacing: 16) {
             ProgressView()
                 .controlSize(.large)
                 .scaleEffect(1.4)
@@ -39,6 +42,12 @@ struct OverviewView: View {
                 stat(symbol: "doc.fill", value: "\(files) files")
                 stat(symbol: "scalemass", value: ByteFormatter.string(bytes))
             }
+            HStack(spacing: 20) {
+                stat(symbol: "clock", value: Self.formatElapsed(elapsed))
+                stat(symbol: "speedometer",
+                     value: rate > 0 ? "\(Int(rate)) files/s" : "—")
+            }
+            .foregroundStyle(.tertiary)
             Text(path)
                 .font(.caption.monospaced())
                 .foregroundStyle(.tertiary)
@@ -51,6 +60,11 @@ struct OverviewView: View {
                 .multilineTextAlignment(.center)
                 .frame(maxWidth: 480)
                 .padding(.top, 4)
+            Button(role: .destructive) { model.cancel() } label: {
+                Label("Stop Scan", systemImage: "stop.circle.fill")
+            }
+            .controlSize(.large)
+            .padding(.top, 4)
         }
         .frame(maxWidth: .infinity)
         .padding(.vertical, 60)
@@ -62,6 +76,16 @@ struct OverviewView: View {
             Text(value)
                 .font(.callout.monospaced().weight(.medium))
         }
+    }
+
+    static func formatElapsed(_ seconds: Double) -> String {
+        let total = Int(seconds)
+        let h = total / 3600
+        let m = (total % 3600) / 60
+        let s = total % 60
+        if h > 0 { return String(format: "%dh %02dm %02ds", h, m, s) }
+        if m > 0 { return String(format: "%dm %02ds", m, s) }
+        return String(format: "%ds", s)
     }
 
     private var header: some View {
@@ -82,7 +106,7 @@ struct OverviewView: View {
             } else {
                 Text("Choose a folder and press **Scan** to begin.").foregroundStyle(.secondary)
             }
-        case .scanning(let p, let b, let f):
+        case .scanning(let p, let b, let f, _):
             HStack(spacing: 8) {
                 ProgressView().controlSize(.small)
                 Text("Scanning — \(f) files, \(ByteFormatter.string(b))")
