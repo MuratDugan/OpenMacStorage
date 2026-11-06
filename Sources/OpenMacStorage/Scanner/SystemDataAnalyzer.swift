@@ -110,21 +110,9 @@ enum SystemDataAnalyzer {
                      cleanable: false)
     }
 
-    /// Directory total size (recursive).
+    /// Directory total size (recursive, on-disk).
     static func directorySize(at path: String) -> Int64 {
-        guard FileManager.default.fileExists(atPath: path) else { return 0 }
-        var total: Int64 = 0
-        let url = URL(fileURLWithPath: path)
-        if let enumerator = FileManager.default.enumerator(at: url,
-                                                           includingPropertiesForKeys: [.totalFileAllocatedSizeKey, .fileSizeKey],
-                                                           options: [.skipsHiddenFiles, .skipsPackageDescendants],
-                                                           errorHandler: { _, _ in true }) {
-            for case let fileURL as URL in enumerator {
-                let values = try? fileURL.resourceValues(forKeys: [.totalFileAllocatedSizeKey, .fileSizeKey])
-                if let s = values?.totalFileAllocatedSize ?? values?.fileSize { total += Int64(s) }
-            }
-        }
-        return total
+        FastScanner.measure(path: path)
     }
 }
 

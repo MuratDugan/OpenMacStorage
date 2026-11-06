@@ -127,3 +127,7 @@
 "History" = "履歴";
 "Freed: %@" = "解放:%@";
 "Done" = "完了";
+
+/* New categories */
+"App Data" = "アプリデータ";
+"Cloud Drives" = "クラウドドライブ";

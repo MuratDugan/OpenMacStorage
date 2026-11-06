@@ -142,3 +142,7 @@
 "History" = "历史";
 "Freed: %@" = "已释放:%@";
 "Done" = "完成";
+
+/* New categories */
+"App Data" = "应用数据";
+"Cloud Drives" = "云盘";

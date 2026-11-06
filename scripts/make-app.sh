@@ -3,13 +3,19 @@
 # localization resources and an .icns regenerated from assets/icon-1024.png.
 set -euo pipefail
 cd "$(dirname "$0")/.."
+source scripts/signing.sh
 
 ICON_SRC="assets/icon-1024.png"
 APP="OpenMacStorage.app"
 BIN=".build/release/OpenMacStorage"
 BUILD_BUNDLE_PARENT=".build/release"
 
-# 1. Build the binary.
+# 1. Build the binary. SwiftUI macros (@State, @Observable…) ship with Xcode,
+#    not the Command Line Tools — use Xcode's toolchain when CLT is selected.
+if [[ -z "${DEVELOPER_DIR:-}" ]] && [[ "$(xcode-select -p 2>/dev/null)" == *CommandLineTools* ]] \
+   && [[ -d /Applications/Xcode.app/Contents/Developer ]]; then
+  export DEVELOPER_DIR=/Applications/Xcode.app/Contents/Developer
+fi
 swift build -c release
 
 # 2. Generate AppIcon.icns from the source PNG if it's missing or stale.
@@ -63,6 +69,7 @@ cat > "$APP/Contents/Info.plist" <<'PLIST'
   <key>NSHighResolutionCapable</key>  <true/>
   <key>NSPrincipalClass</key>         <string>NSApplication</string>
   <key>NSHumanReadableCopyright</key> <string>© 2026 Murat Duğan. MIT License.</string>
+  <key>NSAppleEventsUsageDescription</key><string>OpenMacStorage asks Finder to empty the Trash when you choose Empty Trash.</string>
   <key>CFBundleDevelopmentRegion</key><string>en</string>
   <key>CFBundleLocalizations</key>
   <array>
@@ -79,6 +86,21 @@ cat > "$APP/Contents/Info.plist" <<'PLIST'
 </dict>
 </plist>
 PLIST
+
+# 6. Code signing. Developer ID + hardened runtime makes the app
+#    notarizable and gives it a stable identity, so macOS keeps privacy
+#    grants (Full Disk Access) across updates. Ad-hoc otherwise.
+IDENTITY=$(signing_identity)
+if [[ "$IDENTITY" == "-" ]]; then
+  codesign --force --sign - "$APP"
+  echo "• Signed ad-hoc (no Developer ID certificate found)."
+else
+  codesign --force --options runtime --timestamp \
+    --entitlements scripts/OpenMacStorage.entitlements \
+    --sign "$IDENTITY" "$APP"
+  codesign --verify --strict "$APP"
+  echo "• Signed: $IDENTITY"
+fi
 
 echo "✓ $APP ready."
 echo "  Open with: open $APP"

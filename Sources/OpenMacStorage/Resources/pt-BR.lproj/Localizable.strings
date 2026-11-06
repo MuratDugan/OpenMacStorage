@@ -127,3 +127,7 @@
 "History" = "Histórico";
 "Freed: %@" = "Liberado: %@";
 "Done" = "Concluído";
+
+/* New categories */
+"App Data" = "Dados de apps";
+"Cloud Drives" = "Unidades na nuvem";

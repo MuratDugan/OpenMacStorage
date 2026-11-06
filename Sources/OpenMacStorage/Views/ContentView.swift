@@ -1,12 +1,22 @@
 import SwiftUI
 import UniformTypeIdentifiers
 
+extension Notification.Name {
+    static let showPermissionFlow = Notification.Name("OpenMacStorage.showPermissionFlow")
+    static let showCleanup = Notification.Name("OpenMacStorage.showCleanup")
+}
+
 struct ContentView: View {
     @Environment(ScanModel.self) private var model
     @State private var selection: Sidebar = .overview
     @AppStorage("hasAcceptedDisclaimer") private var hasAcceptedDisclaimer: Bool = false
     @State private var showDisclaimer: Bool = false
     @State private var reviewDisclaimer: Bool = false
+    @State private var showPermissionFlow: Bool = false
+    @State private var fdaGranted: Bool = true   // refreshed on appear/activate
+    /// Per-session opt-out — "continue with limited access" silences the
+    /// auto-prompt until next launch, but the sidebar chip stays.
+    @State private var permissionPromptDismissed: Bool = false
 
     enum Sidebar: Hashable {
         case overview, browse, treemap, search
@@ -16,7 +26,7 @@ struct ContentView: View {
 
     var body: some View {
         NavigationSplitView {
-            SidebarView(selection: $selection)
+            SidebarView(selection: $selection, fdaGranted: fdaGranted)
                 .navigationSplitViewColumnWidth(min: 220, ideal: 240)
         } detail: {
             Group {
@@ -56,10 +66,47 @@ struct ContentView: View {
         .onReceive(NotificationCenter.default.publisher(for: .showDisclaimer)) { _ in
             reviewDisclaimer = true
         }
+        .sheet(isPresented: $showPermissionFlow, onDismiss: refreshFDA) {
+            PermissionView(onClose: {
+                permissionPromptDismissed = true
+                showPermissionFlow = false
+            })
+        }
+        .onReceive(NotificationCenter.default.publisher(for: .showPermissionFlow)) { _ in
+            showPermissionFlow = true
+        }
+        .onReceive(NotificationCenter.default.publisher(
+            for: NSApplication.didBecomeActiveNotification)) { _ in
+            // The user usually flips the toggle in System Settings and comes
+            // back — re-check on every activation so the chip updates.
+            refreshFDA()
+        }
         .task {
             if model.systemReport == nil { model.runSystemAnalysis() }
             if !hasAcceptedDisclaimer { showDisclaimer = true }
+            refreshFDA()
+            // Auto-run the flow once per launch, after the disclaimer is out
+            // of the way, when access is missing.
+            if hasAcceptedDisclaimer && !fdaGranted && !permissionPromptDismissed {
+                showPermissionFlow = true
+            }
         }
+        .onReceive(NotificationCenter.default.publisher(for: .showCleanup)) { _ in
+            selection = .cleanup
+        }
+        .onChange(of: model.browseTarget?.id) { _, id in
+            // Any view can ask Browse to open a folder (Overview rows…).
+            if id != nil { selection = .browse }
+        }
+        .onChange(of: hasAcceptedDisclaimer) { _, accepted in
+            if accepted && !fdaGranted && !permissionPromptDismissed {
+                showPermissionFlow = true
+            }
+        }
+    }
+
+    private func refreshFDA() {
+        fdaGranted = FullDiskAccess.isGranted()
     }
 
     private func handleDrop(_ providers: [NSItemProvider]) -> Bool {

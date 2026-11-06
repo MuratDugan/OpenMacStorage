@@ -222,7 +222,7 @@ struct FileIconInfo: Equatable {
 
     enum KindGroup: String, CaseIterable, Identifiable, Hashable {
         case all, folders, documents, images, videos, audio,
-             archives, code, disks, applications, files
+             archives, code, disks, applications, hidden, files, cloudOnly
         var id: String { rawValue }
 
         var label: LocalizedStringKey {
@@ -238,6 +238,8 @@ struct FileIconInfo: Equatable {
             case .code:         "Source code"
             case .disks:        "Disk images"
             case .applications: "Applications"
+            case .hidden:       "Hidden items"
+            case .cloudOnly:    "Only in the cloud"
             }
         }
         var icon: String {
@@ -253,41 +255,47 @@ struct FileIconInfo: Equatable {
             case .code:         "chevron.left.forwardslash.chevron.right"
             case .disks:        "opticaldisc.fill"
             case .applications: "app.fill"
+            case .hidden:       "eye.slash.fill"
+            case .cloudOnly:    "icloud"
             }
         }
+
+        private static let documentExts: Set<String> = [
+            "doc","docx","pages","odt","rtf","pdf","txt","md","markdown",
+            "xls","xlsx","numbers","ods","csv","tsv","ppt","pptx","key","odp"]
+        private static let imageExts: Set<String> = [
+            "png","jpg","jpeg","heic","gif","tiff","tif","webp","bmp",
+            "svg","raw","psd","ai","sketch","fig","xd"]
+        private static let videoExts: Set<String> = ["mp4","mov","mkv","avi","webm","m4v","flv"]
+        private static let audioExts: Set<String> = ["mp3","wav","flac","m4a","aac","ogg","opus","aiff"]
+        private static let archiveExts: Set<String> = ["zip","rar","7z","tar","gz","bz2","xz"]
+        private static let codeExts: Set<String> = [
+            "swift","py","rb","js","ts","tsx","jsx","go","rs","java","kt",
+            "c","cpp","cc","h","hpp","sh","bash","zsh","php","lua",
+            "html","htm","css","scss","sass","less","json","yaml","yml",
+            "toml","xml","plist"]
+        private static let diskExts: Set<String> = ["dmg","iso","img"]
 
         func matches(_ node: FileNode) -> Bool {
             switch self {
             case .all:          return true
             case .folders:      return node.isDirectory
             case .files:        return !node.isDirectory
+            case .hidden:       return node.isHiddenFile
+            case .cloudOnly:    return node.cloudSize > 0
             default:            break
             }
             guard !node.isDirectory else { return false }
             let ext = (node.name as NSString).pathExtension.lowercased()
             switch self {
-            case .documents:
-                return ["doc","docx","pages","odt","rtf","pdf","txt","md","markdown",
-                        "xls","xlsx","numbers","ods","csv","tsv",
-                        "ppt","pptx","key","odp"].contains(ext)
-            case .images:
-                return ["png","jpg","jpeg","heic","gif","tiff","tif","webp","bmp",
-                        "svg","raw","psd","ai","sketch","fig","xd"].contains(ext)
-            case .videos:
-                return ["mp4","mov","mkv","avi","webm","m4v","flv"].contains(ext)
-            case .audio:
-                return ["mp3","wav","flac","m4a","aac","ogg","opus","aiff"].contains(ext)
-            case .archives:
-                return ["zip","rar","7z","tar","gz","bz2","xz"].contains(ext)
-            case .code:
-                return ["swift","py","rb","js","ts","tsx","jsx","go","rs","java","kt",
-                        "c","cpp","cc","h","hpp","sh","bash","zsh","php","lua",
-                        "html","htm","css","scss","sass","less","json","yaml","yml",
-                        "toml","xml","plist"].contains(ext)
-            case .disks:
-                return ["dmg","iso","img"].contains(ext)
-            case .applications:
-                return ext == "app" || ext == "ipa"
+            case .documents:    return Self.documentExts.contains(ext)
+            case .images:       return Self.imageExts.contains(ext)
+            case .videos:       return Self.videoExts.contains(ext)
+            case .audio:        return Self.audioExts.contains(ext)
+            case .archives:     return Self.archiveExts.contains(ext)
+            case .code:         return Self.codeExts.contains(ext)
+            case .disks:        return Self.diskExts.contains(ext)
+            case .applications: return ext == "app" || ext == "ipa"
             default:
                 return false
             }

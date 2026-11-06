@@ -20,6 +20,105 @@ final class ScanModel {
     var volume: VolumeInfo = .boot()
     var categoryTotals: [StorageCategory: Int64] = [:]
     var lastScanDate: Date?
+    /// The loaded scan came from an older version that counted cloud-only
+    /// files at full size — sizes are inflated until the user rescans.
+    var isLegacyScan = false
+
+    /// Logical bytes of cloud-only files in the current tree (not on disk).
+    var cloudOnlyBytes: Int64 { rootNode?.cloudSize ?? 0 }
+
+    /// Actionable findings for Overview, refreshed after scans and deletes.
+    var insights: [Insight] = []
+    /// Volume that holds the scanned folder (may be an external drive).
+    var scanVolume: VolumeInfo = .boot()
+
+    /// Set by any view that wants Browse to open at a specific folder
+    /// (Overview "Show in Browse", search results…). Browse consumes it.
+    var browseTarget: FileNode?
+
+    /// Flat array of every node (root excluded), rebuilt in the background
+    /// after each scan or archive load. Deep search iterates this instead of
+    /// recursing through the tree — contiguous memory, parallelisable, and no
+    /// per-search tree-walk overhead.
+    private(set) var searchIndex: [FileNode] = []
+    private var indexBuildTask: Task<Void, Never>?
+
+    private func rebuildSearchIndex(for root: FileNode) {
+        indexBuildTask?.cancel()
+        searchIndex = []
+        indexBuildTask = Task.detached(priority: .utility) { [weak self] in
+            var flat: [FileNode] = []
+            flat.reserveCapacity(root.fileCount + root.dirCount)
+            Self.flatten(root, into: &flat)
+            if Task.isCancelled { return }
+            let result = flat
+            await MainActor.run { [weak self] in
+                // Only publish if the tree hasn't been replaced meanwhile.
+                if self?.rootNode === root { self?.searchIndex = result }
+            }
+        }
+    }
+
+    nonisolated private static func flatten(_ node: FileNode, into out: inout [FileNode]) {
+        for child in node.children {
+            out.append(child)
+            if child.isDirectory { flatten(child, into: &out) }
+        }
+    }
+
+    /// Detaches trashed nodes from the tree and refreshes every derived total
+    /// (ancestor sizes, category totals, search index) so all views stay
+    /// honest without a rescan.
+    func removeFromTree(_ nodes: [FileNode]) {
+        guard !nodes.isEmpty else { return }
+        var parents: [ObjectIdentifier: FileNode] = [:]
+        var ids = Set<FileNode.ID>()
+        var removedFolder = false
+        for n in nodes {
+            guard let p = n.parent else { continue }
+            p.children.removeAll { $0 === n }
+            n.parent = nil
+            parents[ObjectIdentifier(p)] = p
+            ids.insert(n.id)
+            if n.isDirectory && !n.children.isEmpty { removedFolder = true }
+        }
+        for p in parents.values { p.propagateTotalsUpward() }
+
+        if !searchIndex.isEmpty {
+            if removedFolder, let root = rootNode {
+                // Descendants of a trashed folder must go too: keep only nodes
+                // that still reach the root.
+                searchIndex.removeAll { node in
+                    var cur = node.parent
+                    while let c = cur { if c === root { return false }; cur = c.parent }
+                    return true
+                }
+            } else {
+                searchIndex.removeAll { ids.contains($0.id) }
+            }
+        }
+        if let root = rootNode {
+            var totals: [StorageCategory: Int64] = [:]
+            Self.aggregate(node: root, into: &totals)
+            categoryTotals = totals
+        }
+        refreshInsights()
+    }
+
+    private var insightsTask: Task<Void, Never>?
+
+    func refreshInsights() {
+        insightsTask?.cancel()
+        guard let root = rootNode else { insights = []; return }
+        let totals = categoryTotals
+        insightsTask = Task.detached(priority: .utility) { [weak self] in
+            let found = InsightEngine.analyze(root: root, totals: totals)
+            if Task.isCancelled { return }
+            await MainActor.run { [weak self] in
+                if self?.rootNode === root { self?.insights = found }
+            }
+        }
+    }
 
     /// Built-in quick picks plus any external volume currently mounted under
     /// `/Volumes/`. Mounted volumes are detected dynamically so plugging in a
@@ -56,6 +155,11 @@ final class ScanModel {
         rootNode = nil
         selectedNode = nil
         categoryTotals = [:]
+        isLegacyScan = false
+        browseTarget = nil
+        insights = []
+        searchIndex = []
+        indexBuildTask?.cancel()
 
         let started = Date()
         let flag = cancelFlag
@@ -107,7 +211,10 @@ final class ScanModel {
         lastScanDate = now
         phase = .done(elapsed: elapsed)
         volume = .boot()
+        scanVolume = .forPath(node.path)
         currentRoot = node.path
+        rebuildSearchIndex(for: node)
+        refreshInsights()
         // Diske kaydet (arka planda)
         Task.detached(priority: .background) {
             do { try ScanArchive.save(root: node, scanDate: now) }
@@ -126,8 +233,12 @@ final class ScanModel {
                 self.rootNode = result.root
                 self.categoryTotals = totals
                 self.lastScanDate = result.scanDate
+                self.isLegacyScan = result.isLegacy
                 self.currentRoot = result.root.path
+                self.scanVolume = .forPath(result.root.path)
                 self.phase = .idle
+                self.rebuildSearchIndex(for: result.root)
+                self.refreshInsights()
             }
         }
     }
@@ -149,20 +260,16 @@ final class ScanModel {
         aggregate(node: node, into: &totals)
     }
 
+    /// On-disk bytes per category. A classified folder's whole subtree shares
+    /// its category, so the walk stops at the first classified node; summarized
+    /// `.other` folders contribute their measured `ownSize`.
     nonisolated private static func aggregate(node: FileNode, into totals: inout [StorageCategory: Int64]) {
-        if !node.isDirectory {
+        if !node.isDirectory || node.category != .other {
             totals[node.category, default: 0] += node.size
-        } else {
-            switch node.category {
-            case .applications, .developerXcode, .developerVMs, .caches, .logs,
-                 .mail, .photos, .documents, .downloads, .trash, .iCloud, .systemReserved:
-                totals[node.category, default: 0] += node.size
-                return
-            default:
-                break
-            }
-            for c in node.children { aggregate(node: c, into: &totals) }
+            return
         }
+        if node.ownSize > 0 { totals[.other, default: 0] += node.ownSize }
+        for c in node.children { aggregate(node: c, into: &totals) }
     }
 }
 

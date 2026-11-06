@@ -2,10 +2,39 @@ import SwiftUI
 
 struct SidebarView: View {
     @Binding var selection: ContentView.Sidebar
+    var fdaGranted: Bool = true
     @Environment(ScanModel.self) private var model
 
     var body: some View {
         List(selection: $selection) {
+            if !fdaGranted {
+                Section {
+                    Button {
+                        NotificationCenter.default.post(name: .showPermissionFlow, object: nil)
+                    } label: {
+                        HStack(spacing: 8) {
+                            Image(systemName: "lock.shield.fill")
+                                .foregroundStyle(.orange)
+                            VStack(alignment: .leading, spacing: 1) {
+                                Text("Limited access")
+                                    .font(.callout.weight(.semibold))
+                                Text("Grant Full Disk Access")
+                                    .font(.caption2)
+                                    .foregroundStyle(.secondary)
+                            }
+                            Spacer()
+                            Image(systemName: "chevron.right")
+                                .font(.caption2)
+                                .foregroundStyle(.tertiary)
+                        }
+                        .padding(.vertical, 4).padding(.horizontal, 6)
+                        .background(RoundedRectangle(cornerRadius: 8)
+                            .fill(Color.orange.opacity(0.12)))
+                        .contentShape(Rectangle())
+                    }
+                    .buttonStyle(.plain)
+                }
+            }
             Section {
                 row(.overview, "Overview", "chart.pie.fill")
                 row(.browse, "Browse", "folder.fill")

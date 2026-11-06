@@ -78,6 +78,9 @@ struct OpenMacStorageApp: App {
                     open(URL(string: "mailto:muratkaya665@gmail.com?subject=OpenMacStorage%20Feedback")!)
                 }
                 Divider()
+                Button("Full Disk Access…") {
+                    NotificationCenter.default.post(name: .showPermissionFlow, object: nil)
+                }
                 Button("Disclaimer & Liability…") {
                     NotificationCenter.default.post(name: .showDisclaimer, object: nil)
                 }
@@ -161,12 +164,7 @@ struct OpenMacStorageApp: App {
         alert.addButton(withTitle: String(localized: "Restart Now"))
         alert.addButton(withTitle: String(localized: "Later"))
         if alert.runModal() == .alertFirstButtonReturn {
-            let path = Bundle.main.bundlePath
-            let task = Process()
-            task.launchPath = "/bin/sh"
-            task.arguments = ["-c", "sleep 0.5 && /usr/bin/open '\(path)'"]
-            try? task.run()
-            NSApp.terminate(nil)
+            FullDiskAccess.restartApp()
         }
     }
 }

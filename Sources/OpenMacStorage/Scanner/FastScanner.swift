@@ -1,19 +1,27 @@
 import Foundation
 import Darwin
 
-/// `getattrlistbulk(2)` + paralel worker havuzu ile çok hızlı dizin gezme.
+/// Very fast directory walker built on `getattrlistbulk(2)` and a parallel
+/// worker pool.
 ///
-/// Tasarım:
-///   • Paylaşımlı bir iş kuyruğu (FIFO/LIFO bizim için fark etmez) — her giriş bir
-///     "henüz taranmamış dizin" + onun `FileNode`'u.
-///   • CPU sayısı kadar (max 8) worker thread; her biri kuyruktan bir dizin alır,
-///     `getattrlistbulk` ile **sadece o dizinin doğrudan girişlerini** okur,
-///     `FileNode`'ları üretir, alt dizinleri kuyruğa atar.
-///   • Senkronizasyon kuralı: her `FileNode`'un `children` dizisine **sadece o
-///     dizini sahiplenen tek worker** yazar. Hiyerarşik sahiplik sayesinde lock
-///     gerekmez.
-///   • Tüm worker'lar bittiğinde alt-toplam boyutlar tek thread'de yapraktan
-///     yukarı doğru hesaplanır.
+/// Design:
+///   • A shared work queue of "directories not yet listed" + their `FileNode`.
+///   • `min(8, cores)` worker threads; each pops a directory, reads **only its
+///     direct entries** with `getattrlistbulk`, creates child nodes, and pushes
+///     subdirectories back onto the queue.
+///   • Single-writer rule: only the worker that owns a directory appends to
+///     that node's `children`, so the tree needs no locks.
+///   • Directory totals are aggregated bottom-up on one thread at the end.
+///
+/// Accounting rules (what "size" means):
+///   • Size is **allocated blocks** (`ATTR_FILE_ALLOCSIZE`), i.e. real disk
+///     pressure. Sparse VM images and compressed files report what they use.
+///   • **Cloud-only files** (`SF_DATALESS`: iCloud Optimize Storage,
+///     Nextcloud / Google Drive / OneDrive placeholders) occupy ~0 bytes
+///     locally. Their logical size is tracked separately in `cloudSize` and
+///     never added to the disk total.
+///   • **Hard links** are counted once (deduplicated by inode, but only for
+///     files whose link count is > 1, so the lock is almost never touched).
 enum FastScanner {
 
     struct Progress: Sendable {
@@ -28,13 +36,13 @@ enum FastScanner {
     static func scan(root: String,
                      progress: @escaping @Sendable (Progress) -> Void,
                      isCancelled: @escaping @Sendable () -> Bool) -> FileNode {
-        let rootNode = FileNode(name: (root as NSString).lastPathComponent.isEmpty ? root : (root as NSString).lastPathComponent,
-                                path: root,
-                                isDirectory: true,
+        let rootLast = (root as NSString).lastPathComponent
+        let rootNode = FileNode(rootName: rootLast.isEmpty ? root : rootLast,
+                                fullPath: root,
                                 category: CategoryClassifier.classify(path: root, isDirectory: true))
 
         let queue = WorkQueue()
-        queue.push([(root, rootNode)])
+        queue.push([Job(path: root, node: rootNode, summarize: false)])
 
         let counters = Counters(progress: progress)
         let workerCount = max(2, min(8, ProcessInfo.processInfo.activeProcessorCount))
@@ -47,13 +55,18 @@ enum FastScanner {
         for _ in 0..<workerCount {
             group.enter()
             DispatchQueue.global(qos: .userInitiated).async {
-                while !isCancelled(), let (path, node) = queue.pop() {
-                    scanOneDirectory(path: path,
-                                     node: node,
-                                     queue: queue,
-                                     scanRoot: scanRoot,
-                                     counters: counters,
-                                     isCancelled: isCancelled)
+                // One reusable 256 KB buffer per worker — allocating per
+                // directory meant ~500k large malloc/free pairs per scan.
+                let buffer = EntryBuffer()
+                while !isCancelled(), let job = queue.pop() {
+                    if job.summarize {
+                        summarize(job: job, buffer: buffer, counters: counters,
+                                  isCancelled: isCancelled)
+                    } else {
+                        scanOneDirectory(job: job, queue: queue, buffer: buffer,
+                                         scanRoot: scanRoot, counters: counters,
+                                         isCancelled: isCancelled)
+                    }
                     queue.finishedJob()
                 }
                 group.leave()
@@ -77,215 +90,366 @@ enum FastScanner {
         return rootNode
     }
 
-    // MARK: - Single-directory scan
+    /// Exact on-disk size of a folder (hidden files included, hard links
+    /// counted once, cloud placeholders at their local size). Single-threaded
+    /// and node-free — meant for measuring individual folders.
+    static func measure(path: String) -> Int64 {
+        var isDir: ObjCBool = false
+        guard FileManager.default.fileExists(atPath: path, isDirectory: &isDir) else { return 0 }
+        guard isDir.boolValue else {
+            let values = try? URL(fileURLWithPath: path)
+                .resourceValues(forKeys: [.totalFileAllocatedSizeKey, .fileSizeKey])
+            return Int64(values?.totalFileAllocatedSize ?? values?.fileSize ?? 0)
+        }
+        let node = FileNode(rootName: (path as NSString).lastPathComponent, fullPath: path)
+        summarize(job: Job(path: path, node: node, summarize: true),
+                  buffer: EntryBuffer(),
+                  counters: Counters(progress: { _ in }),
+                  isCancelled: { false })
+        return node.ownSize
+    }
 
-    private static func scanOneDirectory(path: String,
-                                         node: FileNode,
-                                         queue: WorkQueue,
-                                         scanRoot: String,
-                                         counters: Counters,
-                                         isCancelled: @escaping @Sendable () -> Bool) {
-        let fd = open(path, O_RDONLY | O_DIRECTORY, 0)
-        if fd < 0 { return }
-        defer { close(fd) }
+    // MARK: - Raw entry parsing
 
-        var attrList = attrlist()
-        attrList.bitmapcount = u_short(ATTR_BIT_MAP_COUNT)
-        attrList.commonattr = attrgroup_t(ATTR_CMN_RETURNED_ATTRS)
+    /// One directory entry as returned by `getattrlistbulk`, parsed in the
+    /// exact order the kernel packs attributes (see getattrlist(2) and
+    /// getattrlistbulk(2)):
+    ///   RETURNED_ATTRS, ERROR, NAME, OBJTYPE, FLAGS, FILEID,
+    ///   then file attrs LINKCOUNT, TOTALSIZE, ALLOCSIZE.
+    /// Every field is only 4-byte aligned, so all reads are unaligned loads.
+    fileprivate struct RawEntry {
+        var namePtr: UnsafePointer<CChar>?
+        var isDirectory: Bool
+        var errorCode: UInt32
+        var onDiskBytes: Int64
+        var cloudBytes: Int64
+        var fileID: UInt64
+        var linkCount: UInt32
+
+        var name: String { namePtr.map { String(cString: $0) } ?? "" }
+
+        /// Cheap check for "." / ".." without building a String.
+        var isDotOrDotDot: Bool {
+            guard let p = namePtr else { return true }
+            if p[0] == 0x2E {                     // "."
+                if p[1] == 0 { return true }
+                if p[1] == 0x2E && p[2] == 0 { return true }
+            }
+            return p[0] == 0
+        }
+    }
+
+    fileprivate final class EntryBuffer {
+        let size = 256 * 1024
+        let pointer: UnsafeMutableRawPointer
+        init() { pointer = .allocate(byteCount: size, alignment: 8) }
+        deinit { pointer.deallocate() }
+    }
+
+    /// SF_DATALESS from <sys/stat.h>: the file's content is not present
+    /// locally (it's a cloud placeholder).
+    private static let SF_DATALESS_FLAG: UInt32 = 0x4000_0000
+
+    private static func makeAttrList() -> attrlist {
+        var list = attrlist()
+        list.bitmapcount = u_short(ATTR_BIT_MAP_COUNT)
+        list.commonattr = attrgroup_t(ATTR_CMN_RETURNED_ATTRS)
             | attrgroup_t(ATTR_CMN_NAME)
             | attrgroup_t(ATTR_CMN_OBJTYPE)
-            | attrgroup_t(ATTR_CMN_ERROR)
-            // Inode number — used to deduplicate hard-linked files (one big
-            // source of over-counting on Xcode + /System), so the reported
-            // total is closer to APFS's "actual blocks used".
+            | attrgroup_t(ATTR_CMN_FLAGS)
             | attrgroup_t(ATTR_CMN_FILEID)
-        attrList.fileattr = attrgroup_t(ATTR_FILE_TOTALSIZE)
+            | attrgroup_t(ATTR_CMN_ERROR)
+        list.fileattr = attrgroup_t(ATTR_FILE_LINKCOUNT)
+            | attrgroup_t(ATTR_FILE_TOTALSIZE)
             | attrgroup_t(ATTR_FILE_ALLOCSIZE)
+        return list
+    }
 
-        // Daha büyük buffer = daha az syscall. ~256 KB ≈ binlerce giriş/çağrı.
-        let bufferSize = 256 * 1024
-        let buffer = UnsafeMutableRawPointer.allocate(byteCount: bufferSize, alignment: 8)
-        defer { buffer.deallocate() }
+    /// Lists one directory, invoking `body` for every real entry. Returns
+    /// false if the directory couldn't be opened.
+    @discardableResult
+    private static func forEachEntry(inDirectory path: String,
+                                     buffer: EntryBuffer,
+                                     isCancelled: () -> Bool,
+                                     _ body: (RawEntry) -> Void) -> Bool {
+        let fd = open(path, O_RDONLY | O_DIRECTORY | O_CLOEXEC, 0)
+        if fd < 0 { return false }
+        defer { close(fd) }
 
-        let prefix = path.hasSuffix("/") ? path : path + "/"
-        var newSubdirs: [(String, FileNode)] = []
-        var localBytes: Int64 = 0
-        var localFiles: Int = 0
+        var attrList = makeAttrList()
+        let cmnName = attrgroup_t(ATTR_CMN_NAME)
+        let cmnType = attrgroup_t(ATTR_CMN_OBJTYPE)
+        let cmnFlags = attrgroup_t(ATTR_CMN_FLAGS)
+        let cmnFileID = attrgroup_t(ATTR_CMN_FILEID)
+        let cmnError = attrgroup_t(ATTR_CMN_ERROR)
+        let fLink = attrgroup_t(ATTR_FILE_LINKCOUNT)
+        let fTotal = attrgroup_t(ATTR_FILE_TOTALSIZE)
+        let fAlloc = attrgroup_t(ATTR_FILE_ALLOCSIZE)
+        let vdir = fsobj_type_t(VDIR.rawValue)
 
         while !isCancelled() {
-            let count = getattrlistbulk(fd, &attrList, buffer, bufferSize, 0)
+            let count = getattrlistbulk(fd, &attrList, buffer.pointer, buffer.size, 0)
             if count <= 0 { break }
 
-            var ptr = buffer
+            var entryPtr = UnsafeRawPointer(buffer.pointer)
             for _ in 0..<count {
-                let length = ptr.load(as: UInt32.self)
-                let entryStart = ptr
-                var fieldPtr = ptr.advanced(by: 4)
+                let length = Int(entryPtr.loadUnaligned(as: UInt32.self))
+                var field = entryPtr + 4
+                let returned = field.loadUnaligned(as: attribute_set_t.self)
+                field += MemoryLayout<attribute_set_t>.size
 
-                let returned = fieldPtr.load(as: attribute_set_t.self)
-                fieldPtr = fieldPtr.advanced(by: MemoryLayout<attribute_set_t>.size)
+                var entry = RawEntry(namePtr: nil, isDirectory: false, errorCode: 0,
+                                     onDiskBytes: 0, cloudBytes: 0, fileID: 0, linkCount: 1)
 
-                var name: String = ""
-                var objType: fsobj_type_t = 0
-                var fileSize: Int64 = 0
-                var fileID: UInt64 = 0
-
-                if returned.commonattr & attrgroup_t(ATTR_CMN_NAME) != 0 {
-                    let ref = fieldPtr.load(as: attrreference_t.self)
-                    let nameBytes = fieldPtr.advanced(by: Int(ref.attr_dataoffset))
-                    name = String(cString: nameBytes.assumingMemoryBound(to: CChar.self))
-                    fieldPtr = fieldPtr.advanced(by: MemoryLayout<attrreference_t>.size)
+                // ERROR sits right after RETURNED_ATTRS when present.
+                if returned.commonattr & cmnError != 0 {
+                    entry.errorCode = field.loadUnaligned(as: UInt32.self)
+                    field += 4
+                }
+                if returned.commonattr & cmnName != 0 {
+                    let ref = field.loadUnaligned(as: attrreference_t.self)
+                    entry.namePtr = (field + Int(ref.attr_dataoffset))
+                        .assumingMemoryBound(to: CChar.self)
+                    field += MemoryLayout<attrreference_t>.size
+                }
+                if returned.commonattr & cmnType != 0 {
+                    entry.isDirectory = field.loadUnaligned(as: fsobj_type_t.self) == vdir
+                    field += MemoryLayout<fsobj_type_t>.size
+                }
+                var flags: UInt32 = 0
+                if returned.commonattr & cmnFlags != 0 {
+                    flags = field.loadUnaligned(as: UInt32.self)
+                    field += 4
+                }
+                if returned.commonattr & cmnFileID != 0 {
+                    entry.fileID = field.loadUnaligned(as: UInt64.self)
+                    field += 8
                 }
 
-                if returned.commonattr & attrgroup_t(ATTR_CMN_OBJTYPE) != 0 {
-                    objType = fieldPtr.load(as: fsobj_type_t.self)
-                    fieldPtr = fieldPtr.advanced(by: MemoryLayout<fsobj_type_t>.size)
-                }
-
-                if returned.commonattr & attrgroup_t(ATTR_CMN_ERROR) != 0 {
-                    fieldPtr = fieldPtr.advanced(by: MemoryLayout<UInt32>.size)
-                }
-
-                if returned.commonattr & attrgroup_t(ATTR_CMN_FILEID) != 0 {
-                    fileID = fieldPtr.load(as: UInt64.self)
-                    fieldPtr = fieldPtr.advanced(by: MemoryLayout<UInt64>.size)
-                }
-
-                // ÖNEMLİ: TOTALSIZE = mantıksal boyut (sparse file'ın "görünürdeki" boyutu).
-                // ALLOCSIZE = diskte gerçekten kullanılan blok sayısı.
-                // OrbStack data.img.raw, iCloud "dataless" dosyaları, Time Machine
-                // klonları gibi durumlarda doğru cevap ALLOCSIZE'dır.
-                var totalSize: Int64 = 0
-                var allocSize: Int64 = 0
-                if returned.fileattr & attrgroup_t(ATTR_FILE_TOTALSIZE) != 0 {
-                    totalSize = fieldPtr.load(as: Int64.self)
-                    fieldPtr = fieldPtr.advanced(by: MemoryLayout<off_t>.size)
-                }
-                if returned.fileattr & attrgroup_t(ATTR_FILE_ALLOCSIZE) != 0 {
-                    allocSize = fieldPtr.load(as: Int64.self)
-                    fieldPtr = fieldPtr.advanced(by: MemoryLayout<off_t>.size)
-                }
-                // Diskteki gerçek kullanım — sparse'ı doğru raporlar
-                fileSize = allocSize > 0 ? allocSize : totalSize
-
-                ptr = entryStart.advanced(by: Int(length))
-
-                guard !name.isEmpty, name != ".", name != ".." else { continue }
-                let isDir = (objType == fsobj_type_t(VDIR.rawValue))
-                let childPath = prefix + name
-
-                let category = CategoryClassifier.classify(path: childPath, isDirectory: isDir)
-
-                // Hard-link dedup: a file with N names shouldn't be counted N
-                // times. We claim a fileID on first sight and ignore the size
-                // on subsequent sightings — that way the tree still shows the
-                // path, but the byte total reflects actual disk pressure.
-                let isFreshInode = isDir || fileID == 0 || counters.claim(fileID: fileID)
-                let countedSize: Int64 = (isDir || isFreshInode) ? fileSize : 0
-
-                let child = FileNode(name: name,
-                                     path: childPath,
-                                     isDirectory: isDir,
-                                     ownSize: isDir ? 0 : countedSize,
-                                     category: category)
-                child.parent = node
-                node.children.append(child)
-
-                if isDir {
-                    if !shouldSkip(path: childPath, scanRoot: scanRoot) {
-                        newSubdirs.append((childPath, child))
+                if !entry.isDirectory {
+                    if returned.fileattr & fLink != 0 {
+                        entry.linkCount = field.loadUnaligned(as: UInt32.self)
+                        field += 4
                     }
-                } else {
-                    localBytes += countedSize
-                    localFiles += 1
+                    var total: Int64 = 0
+                    var alloc: Int64 = 0
+                    let hasAlloc = returned.fileattr & fAlloc != 0
+                    if returned.fileattr & fTotal != 0 {
+                        total = field.loadUnaligned(as: Int64.self)
+                        field += 8
+                    }
+                    if hasAlloc {
+                        alloc = field.loadUnaligned(as: Int64.self)
+                        field += 8
+                    }
+                    // Real disk usage = allocated blocks. Only fall back to the
+                    // logical size on filesystems that don't report allocation
+                    // (some network shares). Cloud placeholders: blocks ≈ 0,
+                    // logical size goes to the cloud bucket instead.
+                    entry.onDiskBytes = hasAlloc ? alloc : total
+                    if flags & SF_DATALESS_FLAG != 0 {
+                        entry.cloudBytes = max(0, total - alloc)
+                    }
                 }
+
+                entryPtr += length
+                if entry.isDotOrDotDot { continue }
+                body(entry)
+            }
+        }
+        return true
+    }
+
+    // MARK: - Single-directory scan
+
+    private static func scanOneDirectory(job: Job,
+                                         queue: WorkQueue,
+                                         buffer: EntryBuffer,
+                                         scanRoot: String,
+                                         counters: Counters,
+                                         isCancelled: () -> Bool) {
+        let node = job.node
+        let prefix = job.path.hasSuffix("/") ? job.path : job.path + "/"
+        // Category rules are path-prefix based, so once an ancestor is
+        // classified every descendant shares it — no per-file string matching.
+        let inherited: StorageCategory? = node.category == .other ? nil : node.category
+
+        var newJobs: [Job] = []
+        var localBytes: Int64 = 0
+        var localFiles = 0
+
+        forEachEntry(inDirectory: job.path, buffer: buffer, isCancelled: isCancelled) { entry in
+            let name = entry.name
+            guard !name.isEmpty else { return }
+
+            // Paths are only materialised when something needs them.
+            var childPath: String? = nil
+            func path() -> String {
+                if let childPath { return childPath }
+                let p = prefix + name
+                childPath = p
+                return p
+            }
+
+            // Rules start at folders, so a loose file under an unclassified
+            // parent is unclassified too — skip the string matching.
+            let category = inherited
+                ?? (entry.isDirectory
+                    ? CategoryClassifier.classify(path: path(), isDirectory: true)
+                    : .other)
+
+            var onDisk = entry.onDiskBytes
+            var cloud = entry.cloudBytes
+            // Hard links: only files with >1 names can be duplicates, so the
+            // shared inode set is touched for a tiny fraction of entries.
+            if !entry.isDirectory, entry.linkCount > 1, entry.fileID != 0,
+               !counters.claim(fileID: entry.fileID) {
+                onDisk = 0
+                cloud = 0
+            }
+
+            let child = FileNode(name: name,
+                                 isDirectory: entry.isDirectory,
+                                 ownSize: entry.isDirectory ? 0 : onDisk,
+                                 category: category)
+            child.cloudSize = entry.isDirectory ? 0 : cloud
+            child.parent = node
+            node.children.append(child)
+
+            if entry.isDirectory {
+                if isDevArtifact(name: name) {
+                    // Measure without building millions of nodes.
+                    newJobs.append(Job(path: path(), node: child, summarize: true))
+                } else if !shouldSkip(path: path(), scanRoot: scanRoot) {
+                    newJobs.append(Job(path: path(), node: child, summarize: false))
+                }
+            } else {
+                localBytes += onDisk
+                localFiles += 1
             }
         }
 
-        if !newSubdirs.isEmpty { queue.push(newSubdirs) }
-        counters.add(bytes: localBytes, files: localFiles, currentPath: path)
+        if !newJobs.isEmpty { queue.push(newJobs) }
+        counters.add(bytes: localBytes, files: localFiles, currentPath: job.path)
     }
 
-    /// Sahiplik tek-yazara ait olduğundan, tüm taramalar bittikten sonra
-    /// dizin boyutları yapraktan yukarı doğru tek thread'de toplanır.
+    /// Sums a whole subtree (sizes, file count, cloud bytes) into the job's
+    /// node without creating child nodes. Used for dependency folders whose
+    /// contents are restorable and not worth browsing file-by-file.
+    private static func summarize(job: Job,
+                                  buffer: EntryBuffer,
+                                  counters: Counters,
+                                  isCancelled: () -> Bool) {
+        var stack = [job.path]
+        var bytes: Int64 = 0
+        var cloud: Int64 = 0
+        var files = 0
+        while let dir = stack.popLast(), !isCancelled() {
+            let prefix = dir.hasSuffix("/") ? dir : dir + "/"
+            forEachEntry(inDirectory: dir, buffer: buffer, isCancelled: isCancelled) { entry in
+                if entry.isDirectory {
+                    stack.append(prefix + entry.name)
+                    return
+                }
+                files += 1
+                if entry.linkCount > 1, entry.fileID != 0,
+                   !counters.claim(fileID: entry.fileID) { return }
+                bytes += entry.onDiskBytes
+                cloud += entry.cloudBytes
+            }
+        }
+        let node = job.node
+        node.ownSize = bytes
+        node.cloudSize = cloud
+        node.fileCount = files
+        counters.add(bytes: bytes, files: files, currentPath: job.path)
+    }
+
+    /// Bottom-up totals, run once on a single thread after all workers end.
+    /// Summarized folders contribute their measured totals (`ownSize`, and the
+    /// counts written by `summarize`).
     private static func aggregate(_ node: FileNode) {
-        if !node.isDirectory { return }
-        var totalSize: Int64 = 0
+        guard node.isDirectory else { return }
+        if node.children.isEmpty {
+            node.size = node.ownSize
+            return
+        }
+        var total: Int64 = node.ownSize
+        var cloud: Int64 = 0
         var files = 0
         var dirs = 0
         for c in node.children {
             aggregate(c)
-            totalSize += c.size
+            total += c.size
+            cloud += c.cloudSize
             files += c.fileCount
             dirs += c.dirCount
         }
-        node.size = totalSize
+        node.size = total
+        node.cloudSize = cloud
         node.fileCount = files
         node.dirCount = 1 + dirs
     }
 
-    /// Subtrees the scanner refuses to recurse into. Three categories:
-    ///
-    /// 1. **System internals** — `/dev`, `/proc`, swap files, the synthetic
-    ///    `/System/Volumes/Data` link. Recursing here either fails or produces
-    ///    junk.
-    /// 2. **Other volumes** — when scanning `/` we skip `/Volumes/*` so external
-    ///    drives don't get rolled into the system report. When the user
-    ///    explicitly picks an external drive as the scan root we keep going.
-    /// 3. **Dev artifacts** — `.venv`, `node_modules` etc. These contain
-    ///    millions of small files restored from `requirements.txt` /
-    ///    `package.json` so they're not useful "what's eating my disk"
-    ///    information. The folder itself still shows up in the tree; we just
-    ///    don't descend into its children.
+    /// Subtrees the scanner refuses to recurse into:
+    ///   1. System internals — `/dev`, swap, the synthetic `/System/Volumes/Data`
+    ///      firmlink target (would double-count every user file).
+    ///   2. Other volumes — when scanning `/` we skip `/Volumes/*` so external
+    ///      drives don't get rolled into the system report. When the user
+    ///      explicitly picks an external drive as the scan root we keep going.
     private static func shouldSkip(path: String, scanRoot: String) -> Bool {
         if path == "/System/Volumes/Data" { return true }
         if path.hasPrefix("/dev") || path.hasPrefix("/proc") || path == "/private/var/vm" { return true }
         if path.hasPrefix("/Volumes/") && !scanRoot.hasPrefix("/Volumes/") {
             return true
         }
-        if isDevArtifact(path) { return true }
         return false
     }
 
     /// Build/dependency folders whose contents are recreated from a manifest
-    /// and which routinely contain hundreds of thousands of small files.
-    private static let devArtifactNames: Set<String> = [
-        ".venv", "venv", ".env",
-        "node_modules",
+    /// and which routinely contain hundreds of thousands of small files. They
+    /// are measured exactly but not expanded into the tree.
+    static let devArtifactNames: Set<String> = [
+        ".venv", "venv", "node_modules",
         ".tox", "__pypackages__",
         "Pods",                   // CocoaPods
-        ".gradle", ".m2",         // Gradle, Maven local caches
-        "target",                 // Rust / Maven
-        ".next", ".nuxt",         // JS frameworks
-        ".cache", "__pycache__"
+        ".gradle",                // Gradle project cache
+        ".next", ".nuxt", ".turbo",
+        "__pycache__", "DerivedData"
     ]
 
+    static func isDevArtifact(name: String) -> Bool { devArtifactNames.contains(name) }
+
     static func isDevArtifact(_ path: String) -> Bool {
-        let last = (path as NSString).lastPathComponent
-        return devArtifactNames.contains(last)
+        isDevArtifact(name: (path as NSString).lastPathComponent)
     }
 }
 
 // MARK: - Concurrent helpers
 
+private struct Job {
+    let path: String
+    let node: FileNode
+    let summarize: Bool
+}
+
 private final class WorkQueue: @unchecked Sendable {
     private let cond = NSCondition()
-    private var pending: [(String, FileNode)] = []
+    private var pending: [Job] = []
     private var active: Int = 0
     private var cancelled: Bool = false
 
-    func push(_ items: [(String, FileNode)]) {
+    func push(_ items: [Job]) {
         cond.lock()
         pending.append(contentsOf: items)
         cond.broadcast()
         cond.unlock()
     }
 
-    /// Returns the next directory to scan and bumps `active`. When no work is
-    /// pending and no worker is active anymore, returns nil — the scan is done.
-    /// Also returns nil immediately if `cancel()` has been called so workers
-    /// idling on `cond.wait()` exit promptly when the user hits Stop.
-    func pop() -> (String, FileNode)? {
+    /// Returns the next job and bumps `active`. When nothing is pending and no
+    /// worker is active, returns nil — the scan is done. Also returns nil
+    /// immediately after `cancel()` so idle workers exit promptly on Stop.
+    func pop() -> Job? {
         cond.lock()
         defer { cond.unlock() }
         while pending.isEmpty {
@@ -307,10 +471,8 @@ private final class WorkQueue: @unchecked Sendable {
         cond.unlock()
     }
 
-    /// Wake every worker that's parked inside `pop()` so they can return nil
-    /// and exit. Workers that are *inside* a syscall (open, getattrlistbulk)
-    /// can't be interrupted — they'll finish that single directory first —
-    /// but the queue won't hand them new work after Stop.
+    /// Wake every worker parked in `pop()` so it can exit. Workers inside a
+    /// syscall finish that one directory first, but get no new work.
     func cancel() {
         cond.lock()
         cancelled = true
@@ -330,14 +492,10 @@ private final class Counters: @unchecked Sendable {
 
     init(progress: @escaping @Sendable (FastScanner.Progress) -> Void) {
         self.progress = progress
-        // Most home folders have a couple million files; reserve to avoid
-        // repeated rehashing when the set grows.
-        self.seenInodes.reserveCapacity(2_000_000)
     }
 
-    /// Returns true if this is the first time we've seen `fileID` — in which
-    /// case the caller should add the file size to the running total. Returns
-    /// false for subsequent calls with the same ID (hard-linked file).
+    /// True the first time `fileID` is seen. Only called for files with a
+    /// link count above one, so contention stays negligible.
     func claim(fileID: UInt64) -> Bool {
         os_unfair_lock_lock(&lock)
         defer { os_unfair_lock_unlock(&lock) }

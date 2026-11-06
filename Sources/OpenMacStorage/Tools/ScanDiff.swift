@@ -46,9 +46,18 @@ enum ScanDiff {
     }
 
     /// Sadece **klasörleri** düz haritaya çıkarır. Yapraklar gürültü yaratıyor.
+    /// Path yukarıdan taşınır — düğümler artık path saklamadığından her düğümde
+    /// zincirden yeniden kurmak O(n × derinlik) olurdu.
     private static func flatten(_ node: FileNode, into map: inout [String: FileNode]) {
+        flattenWalk(node, path: node.path, into: &map)
+    }
+
+    private static func flattenWalk(_ node: FileNode, path: String, into map: inout [String: FileNode]) {
         guard node.isDirectory else { return }
-        map[node.path] = node
-        for c in node.children { flatten(c, into: &map) }
+        map[path] = node
+        let prefix = path.hasSuffix("/") ? path : path + "/"
+        for c in node.children where c.isDirectory {
+            flattenWalk(c, path: prefix + c.name, into: &map)
+        }
     }
 }

@@ -32,6 +32,20 @@ struct BrowseView: View {
                                        description: Text("Run a scan first."))
             }
         }
+        .onAppear(perform: consumeBrowseTarget)
+        .onChange(of: model.browseTarget?.id) { _, _ in consumeBrowseTarget() }
+        .onChange(of: model.rootNode?.id) { _, _ in path = [] }
+    }
+
+    /// Opens the folder another screen asked for (files open their parent).
+    private func consumeBrowseTarget() {
+        guard let target = model.browseTarget, let root = model.rootNode else { return }
+        model.browseTarget = nil
+        let folder = target.isDirectory ? target : (target.parent ?? root)
+        var chain = folder.ancestorChain + [folder]
+        guard chain.first === root else { return }   // stale node from an old tree
+        chain.removeFirst()
+        path = chain
     }
 }
 
@@ -69,6 +83,7 @@ struct Breadcrumb: View {
 // MARK: - Folder contents
 
 struct FolderContents: View {
+    @Environment(ScanModel.self) private var model
     let parent: FileNode
     let onOpen: (FileNode) -> Void
     let onGoUp: () -> Void
@@ -78,7 +93,7 @@ struct FolderContents: View {
     @State private var categoryFilter: StorageCategory? = nil
     @State private var minSizeMB: Double = 0
     @State private var sort: SortKey = .sizeDesc
-    @State private var selection: Set<UUID> = []
+    @State private var selection: Set<FileNode.ID> = []
     @State private var reloadToken = UUID()
     @State private var pendingDelete: PendingDelete?
     @State private var lastError: String?
@@ -154,7 +169,11 @@ struct FolderContents: View {
                 .padding(.horizontal, 20).padding(.vertical, 10)
                 .background(.regularMaterial)
             Divider()
-            tableView
+            if parent.isSummarized {
+                summarizedNotice
+            } else {
+                tableView
+            }
             if !selection.isEmpty {
                 Divider()
                 selectionBar
@@ -184,7 +203,8 @@ struct FolderContents: View {
             HStack(spacing: 6) {
                 Image(systemName: "scalemass").foregroundStyle(.secondary)
                 Text(ByteFormatter.string(parent.size))
-                    .font(.callout.monospaced().weight(.medium))
+                    .font(.callout.weight(.semibold))
+                    .monospacedDigit()
             }
             HStack(spacing: 6) {
                 Image(systemName: "folder.fill").foregroundStyle(.secondary)
@@ -195,6 +215,44 @@ struct FolderContents: View {
                 Image(systemName: "doc.fill").foregroundStyle(.secondary)
                 Text("\(parent.fileCount) files total")
                     .font(.callout)
+            }
+            if parent.cloudSize > 0 {
+                Button {
+                    kindFilter = kindFilter == .cloudOnly ? .all : .cloudOnly
+                } label: {
+                    HStack(spacing: 6) {
+                        Image(systemName: "icloud.fill")
+                        Text("\(ByteFormatter.string(parent.cloudSize)) only in cloud")
+                            .font(.callout.weight(.medium))
+                            .monospacedDigit()
+                    }
+                    .padding(.horizontal, 9).padding(.vertical, 3)
+                    .background(Capsule().fill(kindFilter == .cloudOnly
+                                               ? Theme.cloud : Theme.cloud.opacity(0.14)))
+                    .foregroundStyle(kindFilter == .cloudOnly ? .white : Theme.cloud)
+                }
+                .buttonStyle(.plain)
+                .help(Text("These files appear full-size in Finder but are not downloaded, so they use no space on this Mac. Click to filter."))
+            }
+            let hiddenCount = parent.children.lazy.filter(\.isHiddenFile).count
+            if hiddenCount > 0 {
+                Button {
+                    kindFilter = kindFilter == .hidden ? .all : .hidden
+                } label: {
+                    HStack(spacing: 6) {
+                        Image(systemName: "eye.slash.fill")
+                            .foregroundStyle(kindFilter == .hidden ? .white : .purple)
+                        Text("\(hiddenCount) hidden")
+                            .font(.callout.weight(.medium))
+                    }
+                    .padding(.horizontal, 9).padding(.vertical, 3)
+                    .background(Capsule().fill(kindFilter == .hidden
+                                               ? Color.purple
+                                               : Color.purple.opacity(0.14)))
+                    .foregroundStyle(kindFilter == .hidden ? .white : .purple)
+                }
+                .buttonStyle(.plain)
+                .help(Text("Items Finder hides by default. Click to filter."))
             }
             Spacer()
             if anyFilterActive {
@@ -209,6 +267,20 @@ struct FolderContents: View {
         }
         .padding(.horizontal, 20).padding(.vertical, 8)
         .background(Color.primary.opacity(0.03))
+    }
+
+    private var summarizedNotice: some View {
+        VStack(spacing: Theme.Space.m) {
+            EmptyState(icon: "shippingbox",
+                       title: "Dependency folder",
+                       message: "\(ByteFormatter.string(parent.size)) in \(parent.fileCount.formatted()) files. Folders like node_modules, .venv and DerivedData are measured exactly but not listed file by file — that keeps scans fast. They can be recreated by your package manager or build tool.")
+            Button {
+                NSWorkspace.shared.activateFileViewerSelecting([URL(fileURLWithPath: parent.path)])
+            } label: {
+                Label("Show in Finder", systemImage: "folder")
+            }
+        }
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
     }
 
     // MARK: - Filter bar
@@ -299,6 +371,7 @@ struct FolderContents: View {
             TableColumn("Name") { c in
                 HStack(spacing: 10) {
                     let info = FileIconInfo.forNode(c)
+                    let hidden = c.isHiddenFile
                     ZStack {
                         // Soft tinted square so the icon reads even on tight rows.
                         // Folders get a stronger tint to stand out from files.
@@ -309,9 +382,31 @@ struct FolderContents: View {
                             .foregroundStyle(info.color)
                             .font(.system(size: 12, weight: c.isDirectory ? .semibold : .regular))
                     }
+                    .opacity(hidden ? 0.55 : 1)
                     Text(c.name)
                         .font(c.isDirectory ? .body.weight(.medium) : .body)
+                        .foregroundStyle(hidden ? .secondary : .primary)
                         .lineLimit(1)
+                        .truncationMode(.middle)
+                        .help(Text(verbatim: c.name))
+                    if hidden {
+                        Image(systemName: "eye.slash.fill")
+                            .foregroundStyle(.tertiary)
+                            .font(.caption2)
+                            .help(Text("Hidden — Finder doesn't show this item."))
+                    }
+                    if c.isCloudOnly {
+                        Image(systemName: "icloud")
+                            .foregroundStyle(Theme.cloud)
+                            .font(.caption)
+                            .help(Text("Only in the cloud — \(ByteFormatter.string(c.cloudSize)) not downloaded, using no space on this Mac."))
+                    }
+                    if c.isSummarized {
+                        Image(systemName: "shippingbox")
+                            .foregroundStyle(.secondary)
+                            .font(.caption)
+                            .help(Text("Dependency folder — measured, not listed file by file."))
+                    }
                     let risk = RiskClassifier.assess(c.path)
                     if risk.level >= .medium {
                         Image(systemName: risk.icon)
@@ -323,29 +418,39 @@ struct FolderContents: View {
             }
             TableColumn("Size") { c in
                 Text(ByteFormatter.string(c.size))
-                    .font(.system(.body, design: .monospaced))
+                    .monospacedDigit()
                     .foregroundStyle(.secondary)
             }
-            .width(110)
+            .width(100)
+            .width(min: 220, ideal: 380)
             TableColumn("Share") { c in
                 let frac = parent.size > 0 ? Double(c.size) / Double(parent.size) : 0
-                ShareBar(fraction: frac, color: c.category.color)
+                ShareBar(fraction: frac, color: c.category.color.opacity(0.8), height: 8)
             }
-            .width(min: 80, ideal: 200)
+            .width(min: 60, ideal: 140, max: 260)
             TableColumn("Kind") { c in
                 Text(FileIconInfo.kindLabel(for: c))
                     .font(.caption)
                     .foregroundStyle(.secondary)
             }
-            .width(min: 100, ideal: 160)
+            .width(min: 80, ideal: 120)
             TableColumn("Contents") { c in
-                if c.isDirectory {
-                    Text("\(c.fileCount) files").font(.caption).foregroundStyle(.tertiary)
-                } else { Text("") }
+                HStack(spacing: 6) {
+                    if c.isDirectory {
+                        Text("\(c.fileCount) files").foregroundStyle(.tertiary)
+                    }
+                    if c.cloudSize > 0 {
+                        Label(ByteFormatter.string(c.cloudSize), systemImage: "icloud")
+                            .foregroundStyle(Theme.cloud)
+                            .help(Text("Size in the cloud, not on this Mac"))
+                    }
+                }
+                .font(.caption)
+                .monospacedDigit()
             }
-            .width(80)
+            .width(min: 80, ideal: 150)
         }
-        .contextMenu(forSelectionType: UUID.self) { ids in
+        .contextMenu(forSelectionType: FileNode.ID.self) { ids in
             menuItems(for: nodes(for: ids))
         } primaryAction: { ids in
             if let n = nodes(for: ids).first { onOpen(n) }
@@ -423,7 +528,7 @@ struct FolderContents: View {
         }
     }
 
-    private func nodes(for ids: Set<UUID>) -> [FileNode] {
+    private func nodes(for ids: Set<FileNode.ID>) -> [FileNode] {
         parent.children.filter { ids.contains($0.id) }
     }
 
@@ -478,29 +583,20 @@ struct FolderContents: View {
         pendingDelete = nil
         let toDelete = p.nodes.filter { RiskClassifier.assess($0.path).level != .blocked }
         var failures: [String] = []
+        var trashed: [FileNode] = []
         for n in toDelete {
             if let err = CleanupActions.moveToTrash(n.path) {
                 failures.append("• \((n.path as NSString).lastPathComponent): \(err.localizedDescription)")
-            } else if let idx = parent.children.firstIndex(where: { $0.id == n.id }) {
-                parent.children.remove(at: idx)
+            } else {
+                trashed.append(n)
             }
         }
-        propagateSizeRecount(from: parent)
+        model.removeFromTree(trashed)
         selection = []
         reloadToken = UUID()
         if !failures.isEmpty {
             lastError = String(localized: "Some items couldn't be moved:") + "\n\n" +
                         failures.joined(separator: "\n")
-        }
-    }
-
-    private func propagateSizeRecount(from start: FileNode) {
-        var cur: FileNode? = start
-        while let n = cur {
-            n.size = n.children.reduce(0) { $0 + $1.size }
-            n.fileCount = n.children.reduce(0) { $0 + $1.fileCount }
-            n.dirCount = 1 + n.children.reduce(0) { $0 + $1.dirCount }
-            cur = n.parent
         }
     }
 
@@ -519,23 +615,6 @@ struct FolderContents: View {
         guard !items.isEmpty else { return }
         let urls = items.map { URL(fileURLWithPath: $0.path) }
         Task { @MainActor in QuickLookPanel.shared.show(urls: urls) }
-    }
-}
-
-// MARK: - Share bar
-
-private struct ShareBar: View {
-    let fraction: Double
-    let color: Color
-    var body: some View {
-        GeometryReader { geo in
-            ZStack(alignment: .leading) {
-                RoundedRectangle(cornerRadius: 3).fill(.quaternary)
-                RoundedRectangle(cornerRadius: 3).fill(color.opacity(0.7))
-                    .frame(width: max(2, CGFloat(fraction) * geo.size.width))
-            }
-        }
-        .frame(height: 8)
     }
 }
 

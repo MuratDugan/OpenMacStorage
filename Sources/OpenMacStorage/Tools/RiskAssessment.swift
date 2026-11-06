@@ -73,6 +73,12 @@ enum RiskClassifier {
             return medium("External volume — make sure you're deleting the right thing.")
         }
 
+        // High risk: cloud-synced folders. Trashing a file here removes it
+        // from the cloud and from every other synced device too.
+        if path.contains("/Library/CloudStorage/") || path.contains("/Library/Mobile Documents/") {
+            return high("Cloud-synced — deleting removes it from the cloud and your other devices.")
+        }
+
         // High risk: likely breaks the app this belongs to.
         if path.contains("/Library/Containers/") {
             return high("App container — the owning app will lose its data.")

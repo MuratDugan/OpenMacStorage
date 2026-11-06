@@ -18,7 +18,7 @@ struct SearchView: View {
     @State private var elapsedMs: Double = 0
     @State private var searching: Bool = false
     @State private var page: Int = 0
-    @State private var selection: Set<UUID> = []
+    @State private var selection: Set<FileNode.ID> = []
     @State private var debounce: Task<Void, Never>?
     @State private var pendingSearch: Bool = false  // true between keystroke and result
     @State private var pendingDelete: PendingDelete?
@@ -533,9 +533,25 @@ struct SearchView: View {
         searching = true
         let started = Date()
         let queryForRanking = q.lowercased()
+        let index = model.searchIndex
         Task.detached(priority: .userInitiated) {
-            var hits: [FileNode] = []
-            collect(node: root, matcher: matcher, kind: kind, minBytes: bytes, into: &hits)
+            var hits: [FileNode]
+            if matcher.needsPath || index.isEmpty {
+                // Path-based matching (or index still building): walk the tree
+                // once, carrying the lowercased path prefix down — O(total
+                // characters), not O(nodes × depth).
+                var collected: [FileNode] = []
+                Self.collectByPath(node: root,
+                                   lowerPath: root.path.lowercased(),
+                                   matcher: matcher, kind: kind, minBytes: bytes,
+                                   into: &collected)
+                hits = collected
+            } else {
+                // Name-based matching: flat contiguous index, split across all
+                // cores. Cheap filters (size, kind) run before any string work.
+                hits = Self.parallelMatch(index: index, matcher: matcher,
+                                          kind: kind, minBytes: bytes)
+            }
             if sortKey == .relevance && !queryForRanking.isEmpty {
                 sortByRelevance(&hits, query: queryForRanking)
             } else {
@@ -552,6 +568,70 @@ struct SearchView: View {
                 self.page = 0
                 self.selection = []
             }
+        }
+    }
+
+    /// Chunked parallel scan over the flat node index.
+    private nonisolated static func parallelMatch(index: [FileNode],
+                                                  matcher: SearchMatcher,
+                                                  kind: FileIconInfo.KindGroup,
+                                                  minBytes: Int64) -> [FileNode] {
+        let n = index.count
+        // Below ~100k nodes the fan-out overhead outweighs the win.
+        let chunks = n > 100_000 ? min(8, max(2, ProcessInfo.processInfo.activeProcessorCount)) : 1
+        if chunks == 1 {
+            var out: [FileNode] = []
+            for node in index where node.size >= minBytes
+                && (kind == .all || kind.matches(node))
+                && matcher.matchesName(node) {
+                out.append(node)
+            }
+            return out
+        }
+        let lock = NSLock()
+        var all: [FileNode] = []
+        DispatchQueue.concurrentPerform(iterations: chunks) { i in
+            let lo = n * i / chunks
+            let hi = n * (i + 1) / chunks
+            var local: [FileNode] = []
+            for idx in lo..<hi {
+                let node = index[idx]
+                if node.size >= minBytes,
+                   kind == .all || kind.matches(node),
+                   matcher.matchesName(node) {
+                    local.append(node)
+                }
+            }
+            if !local.isEmpty {
+                lock.lock()
+                all.append(contentsOf: local)
+                lock.unlock()
+            }
+        }
+        return all
+    }
+
+    /// Path-mode collection: the lowercased absolute path is carried down the
+    /// recursion so no node ever rebuilds it from the parent chain.
+    private nonisolated static func collectByPath(node: FileNode,
+                                                  lowerPath: String,
+                                                  matcher: SearchMatcher,
+                                                  kind: FileIconInfo.KindGroup,
+                                                  minBytes: Int64,
+                                                  into hits: inout [FileNode]) {
+        if node.parent != nil,
+           node.size >= minBytes,
+           kind == .all || kind.matches(node),
+           matcher.matchesTarget(lowerPath, node: node) {
+            hits.append(node)
+        }
+        guard node.isDirectory, !node.children.isEmpty else { return }
+        let prefix = lowerPath.hasSuffix("/") ? lowerPath : lowerPath + "/"
+        for child in node.children {
+            collectByPath(node: child,
+                          lowerPath: prefix + child.name.lowercased(),
+                          matcher: matcher, kind: kind, minBytes: minBytes,
+                          into: &hits)
         }
     }
 
@@ -576,19 +656,48 @@ struct SearchView: View {
         case fuzzyTokens(tokens: [String], inPath: Bool)
         case regex(NSRegularExpression, inPath: Bool)
 
-        func matches(_ node: FileNode) -> Bool {
+        /// Path-based matchers need the tree walk with a carried prefix;
+        /// name-based matchers can run over the flat index.
+        var needsPath: Bool {
             switch self {
-            case .alwaysTrue: return true
-            case .fuzzyTokens(let tokens, let inPath):
-                let target = (inPath ? node.path : node.name).lowercased()
+            case .fuzzyTokens(_, true), .regex(_, true): return true
+            default: return false
+            }
+        }
+
+        /// Name-only match, used on the flat index.
+        func matchesName(_ node: FileNode) -> Bool {
+            switch self {
+            case .alwaysTrue:
+                return true
+            case .fuzzyTokens(let tokens, _):
+                let target = node.name.lowercased()
                 for token in tokens {
                     if !Self.fuzzyContains(token: token, in: target) { return false }
                 }
                 return true
-            case .regex(let regex, let inPath):
-                let target = inPath ? node.path : node.name
+            case .regex(let regex, _):
+                let target = node.name
                 let range = NSRange(target.startIndex..., in: target)
                 return regex.firstMatch(in: target, options: [], range: range) != nil
+            }
+        }
+
+        /// Match against a pre-lowered target string (full path carried down
+        /// the walk). Regexes are compiled case-insensitive, so matching the
+        /// lowered string is equivalent.
+        func matchesTarget(_ loweredTarget: String, node: FileNode) -> Bool {
+            switch self {
+            case .alwaysTrue:
+                return true
+            case .fuzzyTokens(let tokens, _):
+                for token in tokens {
+                    if !Self.fuzzyContains(token: token, in: loweredTarget) { return false }
+                }
+                return true
+            case .regex(let regex, _):
+                let range = NSRange(loweredTarget.startIndex..., in: loweredTarget)
+                return regex.firstMatch(in: loweredTarget, options: [], range: range) != nil
             }
         }
 
@@ -611,24 +720,6 @@ struct SearchView: View {
         }
     }
 
-    private nonisolated func collect(node: FileNode,
-                                     matcher: SearchMatcher,
-                                     kind: FileIconInfo.KindGroup,
-                                     minBytes: Int64,
-                                     into hits: inout [FileNode]) {
-        // Don't include the synthetic root.
-        if node.parent != nil {
-            if matcher.matches(node) &&
-               (kind == .all || kind.matches(node)) &&
-               node.size >= minBytes {
-                hits.append(node)
-            }
-        }
-        for c in node.children {
-            collect(node: c, matcher: matcher, kind: kind, minBytes: minBytes, into: &hits)
-        }
-    }
-
     private nonisolated func sortHits(_ hits: inout [FileNode], by key: SortKey) {
         switch key {
         case .relevance:
@@ -639,7 +730,12 @@ struct SearchView: View {
         case .sizeAsc:  hits.sort { $0.size < $1.size }
         case .nameAsc:  hits.sort { $0.name.localizedCaseInsensitiveCompare($1.name) == .orderedAscending }
         case .nameDesc: hits.sort { $0.name.localizedCaseInsensitiveCompare($1.name) == .orderedDescending }
-        case .pathAsc:  hits.sort { $0.path.localizedCaseInsensitiveCompare($1.path) == .orderedAscending }
+        case .pathAsc:
+            // Materialise each path once — paths are derived from the parent
+            // chain, so comparing inside the sort would rebuild them repeatedly.
+            let keyed = hits.map { (node: $0, key: $0.path) }
+                .sorted { $0.key.localizedCaseInsensitiveCompare($1.key) == .orderedAscending }
+            hits = keyed.map(\.node)
         }
     }
 
@@ -654,17 +750,39 @@ struct SearchView: View {
     /// Then we add a small bonus for shorter names — among items that match
     /// equally well, the more specific filename wins.
     private nonisolated func sortByRelevance(_ hits: inout [FileNode], query: String) {
+        guard !hits.isEmpty else { return }
         let q = query.lowercased()
         let tokens = q.split(whereSeparator: { $0.isWhitespace }).map(String.init)
-        // Tie-breaker fallback to size desc.
-        hits.sort { a, b in
-            let sa = Self.relevanceScore(name: a.name.lowercased(), path: a.path.lowercased(),
-                                         query: q, tokens: tokens)
-            let sb = Self.relevanceScore(name: b.name.lowercased(), path: b.path.lowercased(),
-                                         query: q, tokens: tokens)
-            if sa != sb { return sa > sb }
-            return a.size > b.size
+
+        // Decorate–sort–undecorate: score each node exactly once (the old
+        // comparator-recomputation rebuilt lowered paths O(n log n) times).
+        let nodes = hits
+        var scores = [Int](repeating: 0, count: nodes.count)
+        let n = nodes.count
+        let chunks = n > 20_000 ? min(8, max(2, ProcessInfo.processInfo.activeProcessorCount)) : 1
+        scores.withUnsafeMutableBufferPointer { buf in
+            guard let base = buf.baseAddress else { return }
+            if chunks == 1 {
+                for i in 0..<n {
+                    base[i] = Self.relevanceScore(name: nodes[i].name.lowercased(),
+                                                  path: nodes[i].path.lowercased(),
+                                                  query: q, tokens: tokens)
+                }
+            } else {
+                DispatchQueue.concurrentPerform(iterations: chunks) { c in
+                    let lo = n * c / chunks, hi = n * (c + 1) / chunks
+                    for i in lo..<hi {
+                        base[i] = Self.relevanceScore(name: nodes[i].name.lowercased(),
+                                                      path: nodes[i].path.lowercased(),
+                                                      query: q, tokens: tokens)
+                    }
+                }
+            }
         }
+        let order = Array(0..<n).sorted { a, b in
+            scores[a] != scores[b] ? scores[a] > scores[b] : nodes[a].size > nodes[b].size
+        }
+        hits = order.map { nodes[$0] }
     }
 
     fileprivate static func relevanceScore(name: String, path: String,
@@ -792,14 +910,18 @@ struct SearchView: View {
         pendingDelete = nil
         let toDelete = p.nodes.filter { RiskClassifier.assess($0.path).level != .blocked }
         var failures: [String] = []
-        var deletedIds = Set<UUID>()
+        var deletedIds = Set<FileNode.ID>()
+        var trashed: [FileNode] = []
         for n in toDelete {
             if let err = CleanupActions.moveToTrash(n.path) {
                 failures.append("• \((n.path as NSString).lastPathComponent): \(err.localizedDescription)")
             } else {
                 deletedIds.insert(n.id)
+                trashed.append(n)
             }
         }
+        // Prune the tree too so Browse/Treemap/Overview stay honest.
+        model.removeFromTree(trashed)
         results.removeAll { deletedIds.contains($0.id) }
         totalMatched = results.count
         selection.subtract(deletedIds)

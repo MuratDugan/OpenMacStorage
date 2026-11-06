@@ -100,14 +100,26 @@ enum DuplicateFinder {
     // MARK: - Helpers
 
     private static func collect(_ node: FileNode, minSize: Int64, into bucket: inout [Int64: [String]]) {
+        collectWalk(node, path: node.path, minSize: minSize, into: &bucket)
+    }
+
+    /// Walks with the path carried down — nodes don't store paths, and
+    /// rebuilding one per node would cost O(nodes × depth).
+    private static func collectWalk(_ node: FileNode,
+                                    path: String,
+                                    minSize: Int64,
+                                    into bucket: inout [Int64: [String]]) {
         // Skip the entire subtree of macOS-managed paths — APFS sealed-volume
         // cryptex copies, Preboot, and signed system DMGs are *intentionally*
         // duplicated by macOS itself and must never be touched.
-        if isUnsafePath(node.path) { return }
+        if isUnsafePath(path) { return }
         if !node.isDirectory {
-            if node.size >= minSize { bucket[node.size, default: []].append(node.path) }
+            if node.size >= minSize { bucket[node.size, default: []].append(path) }
         } else {
-            for c in node.children { collect(c, minSize: minSize, into: &bucket) }
+            let prefix = path.hasSuffix("/") ? path : path + "/"
+            for c in node.children {
+                collectWalk(c, path: prefix + c.name, minSize: minSize, into: &bucket)
+            }
         }
     }
 

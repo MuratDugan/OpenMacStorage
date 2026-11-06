@@ -27,14 +27,32 @@ struct TreemapPaneView: View {
 
     // MARK: Layered canvas + floating tooltip
 
+    /// Layout memo — hover state changes re-evaluate the body on every mouse
+    /// move; without this the full squarified layout (thousands of rects)
+    /// would be recomputed each time. The memo is a reference box mutated
+    /// during body evaluation (allowed — it's not SwiftUI state).
+    private final class LayoutMemo {
+        var key: String = ""
+        var tiles: [TreemapLayout.Tile] = []
+    }
+    @State private var layoutMemo = LayoutMemo()
+
+    private func tiles(for root: FileNode, size: CGSize) -> [TreemapLayout.Tile] {
+        let key = "\(root.id)|\(Int(size.width))x\(Int(size.height))|\(depth)|\(root.size)|\(root.children.count)"
+        if layoutMemo.key == key { return layoutMemo.tiles }
+        let computed = TreemapLayout.compute(node: root,
+                                            rect: CGRect(origin: .zero, size: size),
+                                            depth: depth)
+        layoutMemo.key = key
+        layoutMemo.tiles = computed
+        return computed
+    }
+
     @ViewBuilder
     private var content: some View {
         if let root = current, root.size > 0 {
             GeometryReader { geo in
-                let canvasRect = CGRect(origin: .zero, size: geo.size)
-                let layouts = TreemapLayout.compute(node: root,
-                                                    rect: canvasRect,
-                                                    depth: depth)
+                let layouts = tiles(for: root, size: geo.size)
                 ZStack {
                     treemapCanvas(layouts: layouts, size: geo.size)
                     if let h = hovered {
@@ -357,6 +375,11 @@ private struct TooltipBubble: View {
                 Text("\(info.node.fileCount) files")
                     .font(.caption2.monospaced())
                     .foregroundStyle(.secondary)
+            }
+            if info.node.cloudSize > 0 {
+                Label("\(ByteFormatter.string(info.node.cloudSize)) only in cloud", systemImage: "icloud")
+                    .font(.caption2)
+                    .foregroundStyle(Theme.cloud)
             }
             Text(info.node.path)
                 .font(.caption2.monospaced())

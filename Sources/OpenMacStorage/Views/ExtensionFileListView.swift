@@ -15,7 +15,7 @@ struct ExtensionFileListView: View {
     @State private var loading = true
     @State private var query: String = ""
     @State private var sort: SortKey = .sizeDesc
-    @State private var selection: Set<UUID> = []
+    @State private var selection: Set<FileNode.ID> = []
     @State private var page: Int = 0
     @State private var pendingDelete = false
     @State private var lastError: String?

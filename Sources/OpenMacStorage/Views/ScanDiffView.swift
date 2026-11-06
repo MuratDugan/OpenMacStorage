@@ -187,7 +187,7 @@ struct ScanDiffView: View {
         }
         hasPrevious = true
         guard let new = model.rootNode else { return }
-        let oldResult: (root: FileNode, scanDate: Date)? = await Task.detached {
+        let oldResult: ScanArchive.Loaded? = await Task.detached {
             try? ScanArchive.load(from: ScanArchive.previousURL)
         }.value
         guard let old = oldResult else { return }
