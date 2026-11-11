@@ -667,3 +667,13 @@
 "Stopped containers, dangling images, unused networks and build cache. Volumes and tagged images stay." = "Stopped containers, dangling images, unused networks and build cache. Volumes and tagged images stay.";
 "Not installed" = "Not installed";
 "Exited with code %lld: %@" = "Exited with code %lld: %@";
+
+/* Category breakdown */
+"Click one to see where the space is" = "Click one to see where the space is";
+"Files that match no category, by folder" = "Files that match no category, by folder";
+"Spread over %@ places" = "Spread over %@ places";
+"Where this space is" = "Where this space is";
+"Nothing here" = "Nothing here";
+"This category is empty in the current scan." = "This category is empty in the current scan.";
+"%@ places inside" = "%@ places inside";
+"%@ files directly here" = "%@ files directly here";

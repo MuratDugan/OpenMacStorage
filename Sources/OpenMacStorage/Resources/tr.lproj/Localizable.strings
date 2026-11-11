@@ -685,3 +685,13 @@
 "Stopped containers, dangling images, unused networks and build cache. Volumes and tagged images stay." = "Durmuş konteynerler, etiketsiz imajlar, kullanılmayan ağlar ve derleme önbelleği. Volume'lar ve etiketli imajlar kalır.";
 "Not installed" = "Kurulu değil";
 "Exited with code %lld: %@" = "%lld koduyla çıktı: %@";
+
+/* Category breakdown */
+"Click one to see where the space is" = "Alanın nerede olduğunu görmek için tıklayın";
+"Files that match no category, by folder" = "Hiçbir kategoriye uymayan dosyalar, klasöre göre";
+"Spread over %@ places" = "%@ konuma dağılmış";
+"Where this space is" = "Bu alanın bulunduğu yer";
+"Nothing here" = "Burada bir şey yok";
+"This category is empty in the current scan." = "Bu kategori mevcut taramada boş.";
+"%@ places inside" = "İçinde %@ konum";
+"%@ files directly here" = "Doğrudan burada %@ dosya";

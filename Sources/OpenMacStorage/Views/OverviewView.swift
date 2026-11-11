@@ -2,6 +2,7 @@ import SwiftUI
 
 struct OverviewView: View {
     @Environment(ScanModel.self) private var model
+    @State private var breakdown: StorageCategory?
 
     var body: some View {
         ScrollView {
@@ -29,6 +30,13 @@ struct OverviewView: View {
             .padding(Theme.Space.xl)
             .frame(maxWidth: 1180, alignment: .leading)
             .frame(maxWidth: .infinity)
+        }
+        .sheet(item: $breakdown) { category in
+            if let root = model.rootNode {
+                CategoryBreakdownView(category: category, root: root,
+                                      total: model.categoryTotals[category] ?? 0)
+                    .environment(model)
+            }
         }
     }
 
@@ -195,7 +203,7 @@ struct OverviewView: View {
             .sorted { $0.value > $1.value }
         let total = max(1, root.size)
         return VStack(alignment: .leading, spacing: Theme.Space.s) {
-            SectionHeader(title: "Categories", subtitle: "Click one to open its largest folder")
+            SectionHeader(title: "Categories", subtitle: "Click one to see where the space is")
             if items.isEmpty {
                 Text("No data").foregroundStyle(.secondary)
             } else {
@@ -203,9 +211,7 @@ struct OverviewView: View {
                     ForEach(items, id: \.key) { item in
                         CategoryRow(category: item.key, bytes: item.value,
                                     fraction: Double(item.value) / Double(total)) {
-                            if let n = Self.largestFolder(of: item.key, in: root) {
-                                model.browseTarget = n
-                            }
+                            breakdown = item.key
                         }
                     }
                 }
@@ -213,26 +219,6 @@ struct OverviewView: View {
         }
         .surfaceCard()
         .frame(maxWidth: .infinity, alignment: .top)
-    }
-
-    /// Largest top-most folder of a category. Classified subtrees inherit
-    /// their category, so only unclassified folders need descending into.
-    static func largestFolder(of category: StorageCategory, in root: FileNode) -> FileNode? {
-        if root.category == category { return root }
-        var best: FileNode?
-        var queue: [FileNode] = [root]
-        var visited = 0
-        while let n = queue.popLast(), visited < 50_000 {
-            visited += 1
-            for c in n.children where c.isDirectory {
-                if c.category == category {
-                    if c.size > (best?.size ?? -1) { best = c }
-                } else if c.category == .other {
-                    queue.append(c)
-                }
-            }
-        }
-        return best
     }
 
     // MARK: - Insights

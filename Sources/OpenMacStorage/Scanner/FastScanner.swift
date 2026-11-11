@@ -33,9 +33,21 @@ enum FastScanner {
         var elapsedSeconds: Double
     }
 
+    /// Turns off on-demand download of cloud-only ("dataless") files and
+    /// folders for this whole process. Without it, merely listing an evicted
+    /// iCloud Desktop/Documents folder makes macOS fetch it from the cloud —
+    /// on a nearly full disk that blocks inside the kernel indefinitely.
+    /// With it, such reads fail fast instead, and nothing is ever downloaded.
+    static let disableCloudMaterialization: Void = {
+        _ = setiopolicy_np(IOPOL_TYPE_VFS_MATERIALIZE_DATALESS_FILES,
+                           IOPOL_SCOPE_PROCESS,
+                           IOPOL_MATERIALIZE_DATALESS_FILES_OFF)
+    }()
+
     static func scan(root: String,
                      progress: @escaping @Sendable (Progress) -> Void,
                      isCancelled: @escaping @Sendable () -> Bool) -> FileNode {
+        _ = disableCloudMaterialization
         let rootLast = (root as NSString).lastPathComponent
         let rootNode = FileNode(rootName: rootLast.isEmpty ? root : rootLast,
                                 fullPath: root,
@@ -94,6 +106,7 @@ enum FastScanner {
     /// counted once, cloud placeholders at their local size). Single-threaded
     /// and node-free — meant for measuring individual folders.
     static func measure(path: String) -> Int64 {
+        _ = disableCloudMaterialization
         var isDir: ObjCBool = false
         guard FileManager.default.fileExists(atPath: path, isDirectory: &isDir) else { return 0 }
         guard isDir.boolValue else {
@@ -125,6 +138,12 @@ enum FastScanner {
         var cloudBytes: Int64
         var fileID: UInt64
         var linkCount: UInt32
+        /// Content lives only in the cloud. For folders: not listable without
+        /// a download, so the scanner doesn't descend.
+        var isDataless: Bool
+        /// Folder is where another volume is mounted (or an automount
+        /// trigger). Never crossed, like `du -x`.
+        var isMountPoint: Bool
 
         var name: String { namePtr.map { String(cString: $0) } ?? "" }
 
@@ -159,6 +178,7 @@ enum FastScanner {
             | attrgroup_t(ATTR_CMN_FLAGS)
             | attrgroup_t(ATTR_CMN_FILEID)
             | attrgroup_t(ATTR_CMN_ERROR)
+        list.dirattr = attrgroup_t(ATTR_DIR_MOUNTSTATUS)
         list.fileattr = attrgroup_t(ATTR_FILE_LINKCOUNT)
             | attrgroup_t(ATTR_FILE_TOTALSIZE)
             | attrgroup_t(ATTR_FILE_ALLOCSIZE)
@@ -182,6 +202,8 @@ enum FastScanner {
         let cmnFlags = attrgroup_t(ATTR_CMN_FLAGS)
         let cmnFileID = attrgroup_t(ATTR_CMN_FILEID)
         let cmnError = attrgroup_t(ATTR_CMN_ERROR)
+        let dMount = attrgroup_t(ATTR_DIR_MOUNTSTATUS)
+        let mountBits = UInt32(DIR_MNTSTATUS_MNTPOINT | DIR_MNTSTATUS_TRIGGER)
         let fLink = attrgroup_t(ATTR_FILE_LINKCOUNT)
         let fTotal = attrgroup_t(ATTR_FILE_TOTALSIZE)
         let fAlloc = attrgroup_t(ATTR_FILE_ALLOCSIZE)
@@ -199,7 +221,8 @@ enum FastScanner {
                 field += MemoryLayout<attribute_set_t>.size
 
                 var entry = RawEntry(namePtr: nil, isDirectory: false, errorCode: 0,
-                                     onDiskBytes: 0, cloudBytes: 0, fileID: 0, linkCount: 1)
+                                     onDiskBytes: 0, cloudBytes: 0, fileID: 0, linkCount: 1,
+                                     isDataless: false, isMountPoint: false)
 
                 // ERROR sits right after RETURNED_ATTRS when present.
                 if returned.commonattr & cmnError != 0 {
@@ -225,8 +248,14 @@ enum FastScanner {
                     entry.fileID = field.loadUnaligned(as: UInt64.self)
                     field += 8
                 }
+                entry.isDataless = flags & SF_DATALESS_FLAG != 0
 
-                if !entry.isDirectory {
+                if entry.isDirectory {
+                    if returned.dirattr & dMount != 0 {
+                        entry.isMountPoint = field.loadUnaligned(as: UInt32.self) & mountBits != 0
+                        field += 4
+                    }
+                } else {
                     if returned.fileattr & fLink != 0 {
                         entry.linkCount = field.loadUnaligned(as: UInt32.self)
                         field += 4
@@ -247,7 +276,7 @@ enum FastScanner {
                     // (some network shares). Cloud placeholders: blocks ≈ 0,
                     // logical size goes to the cloud bucket instead.
                     entry.onDiskBytes = hasAlloc ? alloc : total
-                    if flags & SF_DATALESS_FLAG != 0 {
+                    if entry.isDataless {
                         entry.cloudBytes = max(0, total - alloc)
                     }
                 }
@@ -317,7 +346,15 @@ enum FastScanner {
             node.children.append(child)
 
             if entry.isDirectory {
-                if isDevArtifact(name: name) {
+                if entry.isMountPoint {
+                    // Another volume (Preboot, VM, Update snapshots, disk
+                    // images, network shares). Counted under "Not in this
+                    // scan" instead of being mixed into this one.
+                } else if entry.isDataless {
+                    // Evicted to the cloud: listing it would mean downloading
+                    // it. It takes ~no local space, so leave it as an empty
+                    // folder.
+                } else if isDevArtifact(name: name) {
                     // Measure without building millions of nodes.
                     newJobs.append(Job(path: path(), node: child, summarize: true))
                 } else if !shouldSkip(path: path(), scanRoot: scanRoot) {
@@ -348,7 +385,7 @@ enum FastScanner {
             let prefix = dir.hasSuffix("/") ? dir : dir + "/"
             forEachEntry(inDirectory: dir, buffer: buffer, isCancelled: isCancelled) { entry in
                 if entry.isDirectory {
-                    stack.append(prefix + entry.name)
+                    if !entry.isDataless && !entry.isMountPoint { stack.append(prefix + entry.name) }
                     return
                 }
                 files += 1
